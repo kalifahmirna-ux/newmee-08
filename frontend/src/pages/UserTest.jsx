@@ -211,10 +211,10 @@ const UserTest = () => {
     setAnswers({});
   };
 
-  const handleAnswer = (questionId, answer) => {
+  const handleAnswer = (questionId, optionIndex) => {
     setAnswers(prev => ({
       ...prev,
-      [questionId]: answer
+      [questionId]: optionIndex  // store option index (0-based)
     }));
   };
 
