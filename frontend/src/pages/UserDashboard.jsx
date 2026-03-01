@@ -994,40 +994,6 @@ const UserDashboard = () => {
                           </p>
                         </div>
                       </div>
-                    )}
-                                <span className="text-yellow-400 font-semibold">{formatPrice(qrisData.grossAmount)}</span>
-                              </div>
-                            </div>
-                            
-                            <Button
-                              onClick={() => handleCheckPaymentStatus(qrisData.orderId)}
-                              disabled={checkingPayment}
-                              variant="outline"
-                              className="w-full border-yellow-400/50 text-yellow-400 hover:bg-yellow-400/10"
-                            >
-                              {checkingPayment ? (
-                                <span className="flex items-center justify-center">
-                                  <div className="w-4 h-4 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin mr-2"></div>
-                                  Mengecek Status...
-                                </span>
-                              ) : (
-                                <span className="flex items-center justify-center">
-                                  <CheckCircle className="w-4 h-4 mr-2" />
-                                  Sudah Bayar? Cek Status
-                                </span>
-                              )}
-                            </Button>
-                            
-                            <button
-                              onClick={() => setQrisData(null)}
-                              className="w-full text-gray-400 hover:text-gray-300 text-sm underline"
-                            >
-                              Buat QRIS Baru
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    )}
                   </CardContent>
                 </Card>
 
