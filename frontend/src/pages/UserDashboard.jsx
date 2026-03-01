@@ -907,28 +907,30 @@ const UserDashboard = () => {
                       <p className="text-gray-400 text-sm mb-2">Pilih Metode Pembayaran:</p>
                       <div className="grid grid-cols-2 gap-3">
                         <button
-                          onClick={() => setPaymentMethod('bank')}
+                          onClick={() => { setPaymentMethod('bank'); setQrisData(null); }}
                           className={`p-4 rounded-lg border-2 transition ${
-                            paymentMethod === 'bank' 
-                              ? 'border-yellow-400 bg-yellow-400/10' 
+                            paymentMethod === 'bank'
+                              ? 'border-yellow-400 bg-yellow-400/10'
                               : 'border-gray-600 hover:border-gray-500'
                           }`}
+                          data-testid="payment-method-bank"
                         >
                           <CreditCard className={`w-8 h-8 mx-auto mb-2 ${paymentMethod === 'bank' ? 'text-yellow-400' : 'text-gray-400'}`} />
                           <p className={`text-sm ${paymentMethod === 'bank' ? 'text-yellow-400' : 'text-gray-400'}`}>Transfer Bank</p>
                         </button>
                         <button
-                          onClick={() => setPaymentMethod('ewallet')}
+                          onClick={() => { setPaymentMethod('qris'); setQrisData(null); }}
                           className={`p-4 rounded-lg border-2 transition ${
-                            paymentMethod === 'ewallet' 
-                              ? 'border-yellow-400 bg-yellow-400/10' 
+                            paymentMethod === 'qris'
+                              ? 'border-yellow-400 bg-yellow-400/10'
                               : 'border-gray-600 hover:border-gray-500'
                           }`}
+                          data-testid="payment-method-qris"
                         >
-                          <div className={`w-8 h-8 mx-auto mb-2 flex items-center justify-center ${paymentMethod === 'ewallet' ? 'text-yellow-400' : 'text-gray-400'}`}>
-                            <span className="text-xs font-bold">E-Wallet</span>
+                          <div className={`w-8 h-8 mx-auto mb-2 flex items-center justify-center ${paymentMethod === 'qris' ? 'text-yellow-400' : 'text-gray-400'}`}>
+                            <span className="text-xs font-bold">QRIS</span>
                           </div>
-                          <p className={`text-sm ${paymentMethod === 'ewallet' ? 'text-yellow-400' : 'text-gray-400'}`}>E-Wallet / QRIS</p>
+                          <p className={`text-sm ${paymentMethod === 'qris' ? 'text-yellow-400' : 'text-gray-400'}`}>QRIS</p>
                         </button>
                       </div>
                     </div>
