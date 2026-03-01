@@ -72,9 +72,8 @@ class TestAdminAuth:
         print(f"Admin login: {r.status_code} - {r.text[:200]}")
         assert r.status_code == 200
         data = r.json()
-        assert "token" in data or data.get("success") == True
-        if "token" in data:
-            TestAdminAuth.admin_token = data["token"]
+        assert "access_token" in data or "token" in data
+        TestAdminAuth.admin_token = data.get("access_token") or data.get("token")
 
     def test_admin_dashboard_stats(self):
         if not TestAdminAuth.admin_token:
