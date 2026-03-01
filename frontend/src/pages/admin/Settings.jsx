@@ -511,67 +511,45 @@ const Settings = () => {
         </CardContent>
       </Card>
 
-      {/* Midtrans Settings for Shop */}
+      {/* PayDisini Settings */}
       <Card className="bg-[#2a2a2a] border-yellow-400/20">
         <CardHeader>
-          <CardTitle className="text-white">Pengaturan Midtrans (Shop)</CardTitle>
-          <CardDescription className="text-gray-400">Konfigurasi payment gateway untuk Shop</CardDescription>
+          <CardTitle className="text-white">Pengaturan PayDisini</CardTitle>
+          <CardDescription className="text-gray-400">Konfigurasi payment gateway PayDisini untuk pembayaran</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label className="text-white">Aktifkan Midtrans</Label>
-              <p className="text-gray-400 text-sm">Gunakan Midtrans untuk pembayaran di Shop</p>
+              <Label className="text-white">API ID</Label>
+              <Input
+                value={settings.paydisiniApiId || '3463'}
+                onChange={(e) => handleChange('paydisiniApiId', e.target.value)}
+                placeholder="API ID PayDisini"
+                className="bg-[#1a1a1a] text-white"
+                data-testid="paydisini-api-id-input"
+              />
             </div>
-            <Switch
-              checked={settings.midtransEnabled || false}
-              onCheckedChange={(checked) => handleChange('midtransEnabled', checked)}
-            />
+            <div>
+              <Label className="text-white">API Key</Label>
+              <Input
+                type="password"
+                value={settings.paydisiniApiKey || ''}
+                onChange={(e) => handleChange('paydisiniApiKey', e.target.value)}
+                placeholder="API Key PayDisini"
+                className="bg-[#1a1a1a] text-white"
+                data-testid="paydisini-api-key-input"
+              />
+            </div>
           </div>
-          {settings.midtransEnabled && (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-white">Server Key</Label>
-                  <Input
-                    type="password"
-                    value={settings.midtransServerKey || ''}
-                    onChange={(e) => handleChange('midtransServerKey', e.target.value)}
-                    placeholder="SB-Mid-server-xxx atau Mid-server-xxx"
-                    className="bg-[#1a1a1a] text-white"
-                  />
-                </div>
-                <div>
-                  <Label className="text-white">Client Key</Label>
-                  <Input
-                    value={settings.midtransClientKey || ''}
-                    onChange={(e) => handleChange('midtransClientKey', e.target.value)}
-                    placeholder="SB-Mid-client-xxx atau Mid-client-xxx"
-                    className="bg-[#1a1a1a] text-white"
-                  />
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label className="text-white">Mode Production</Label>
-                  <p className="text-gray-400 text-sm">Matikan untuk mode Sandbox (testing)</p>
-                </div>
-                <Switch
-                  checked={settings.midtransIsProduction || false}
-                  onCheckedChange={(checked) => handleChange('midtransIsProduction', checked)}
-                />
-              </div>
-              <div className="bg-[#1a1a1a] p-4 rounded-lg">
-                <p className="text-gray-400 text-sm">
-                  <strong className="text-yellow-400">Catatan:</strong> Dapatkan API keys dari{' '}
-                  <a href="https://dashboard.midtrans.com" target="_blank" rel="noopener noreferrer" className="text-yellow-400 underline">
-                    Midtrans Dashboard
-                  </a>
-                  {' '}→ Settings → Access Keys
-                </p>
-              </div>
-            </>
-          )}
+          <div className="bg-[#1a1a1a] p-4 rounded-lg">
+            <p className="text-gray-400 text-sm">
+              <strong className="text-yellow-400">PayDisini Production:</strong> API ID: 3463 sudah terkonfigurasi.{' '}
+              <a href="https://paydisini.co.id" target="_blank" rel="noopener noreferrer" className="text-yellow-400 underline">
+                PayDisini Dashboard
+              </a>
+              {' '}untuk informasi lebih lanjut.
+            </p>
+          </div>
         </CardContent>
       </Card>
 

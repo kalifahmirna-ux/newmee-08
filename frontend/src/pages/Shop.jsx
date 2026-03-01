@@ -18,7 +18,7 @@ const Shop = () => {
     email: '',
     phone: ''
   });
-  const [midtransConfig, setMidtransConfig] = useState(null);
+  const [paymentConfig, setPaymentConfig] = useState(null);
 
   useEffect(() => {
     loadProducts();
