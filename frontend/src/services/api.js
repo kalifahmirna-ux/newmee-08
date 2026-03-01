@@ -142,13 +142,12 @@ export const bannersAPI = {
   reorder: (orders) => apiClient.put('/banners/reorder', orders),
 };
 
-// Transactions API (Midtrans)
+// Transactions API
 export const transactionsAPI = {
   create: (data) => apiClient.post('/transactions/create', data),
   getStatus: (orderId) => apiClient.get(`/transactions/${orderId}/status`),
   getAll: (params) => apiClient.get('/transactions', { params }),
   getStats: () => apiClient.get('/transactions/stats/summary'),
-  getConfig: () => apiClient.get('/transactions/config'),
 };
 
 // Certificates API
