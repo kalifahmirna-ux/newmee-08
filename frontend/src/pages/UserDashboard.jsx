@@ -201,7 +201,7 @@ const UserDashboard = () => {
     } catch (error) {
       toast({
         title: 'Error',
-        description: error.response?.data?.detail || 'Gagal upload bukti pembayaran',
+        description: getErrorMsg(error, 'Gagal upload bukti pembayaran'),
         variant: 'destructive'
       });
     } finally {
