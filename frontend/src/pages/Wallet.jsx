@@ -22,6 +22,17 @@ import axios from 'axios';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
+// Helper: safely extract error message from API error
+const getErrorMsg = (error, fallback = 'Terjadi kesalahan') => {
+  const detail = error?.response?.data?.detail;
+  if (!detail) return fallback;
+  if (typeof detail === 'string') return detail;
+  if (Array.isArray(detail)) return detail.map(e => e.msg || String(e)).join(', ');
+  return fallback;
+};
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+
 const Wallet = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
