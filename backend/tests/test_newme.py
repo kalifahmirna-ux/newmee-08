@@ -98,7 +98,7 @@ class TestAnalytics:
         r = requests.post(f"{BASE_URL}/api/admin/login", json={"email": "admin@newme.com", "password": "admin123"})
         if r.status_code != 200:
             pytest.skip("Admin login failed")
-        admin_token = r.json().get("token")
+        admin_token = r.json().get("access_token") or r.json().get("token")
         r2 = requests.get(
             f"{BASE_URL}/api/analytics/stats",
             headers={"Authorization": f"Bearer {admin_token}"}
@@ -121,7 +121,7 @@ class TestPayments:
         r = requests.post(f"{BASE_URL}/api/admin/login", json={"email": "admin@newme.com", "password": "admin123"})
         if r.status_code != 200:
             pytest.skip("Admin login failed")
-        admin_token = r.json().get("token")
+        admin_token = r.json().get("access_token") or r.json().get("token")
         r2 = requests.get(
             f"{BASE_URL}/api/admin/payment-proofs",
             headers={"Authorization": f"Bearer {admin_token}"}
