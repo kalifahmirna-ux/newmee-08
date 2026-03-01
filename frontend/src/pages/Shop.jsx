@@ -46,62 +46,17 @@ const Shop = () => {
 
   const handleCheckout = async (e) => {
     e.preventDefault();
-    
-    if (!midtransConfig?.isConfigured) {
-      toast({
-        title: 'Pembayaran Tidak Tersedia',
-        description: 'Sistem pembayaran belum dikonfigurasi. Silakan hubungi admin.',
-        variant: 'destructive'
-      });
-      return;
-    }
-
     setCheckoutLoading(true);
-    
     try {
-      const orderId = `ORDER-${Date.now()}`;
-      
-      const transactionData = {
-        order_id: orderId,
-        gross_amount: selectedProduct.price,
-        items: [{
-          id: selectedProduct._id,
-          name: selectedProduct.name,
-          price: selectedProduct.price,
-          quantity: 1
-        }],
-        customer: {
-          first_name: customerForm.firstName,
-          last_name: customerForm.lastName,
-          email: customerForm.email,
-          phone: customerForm.phone
-        }
-      };
-
-      const response = await transactionsAPI.create(transactionData);
-      
-      if (response.data.token && window.snap) {
-        window.snap.pay(response.data.token, {
-          onSuccess: (result) => {
-            toast({ title: 'Pembayaran Berhasil', description: 'Terima kasih atas pembelian Anda!' });
-            setShowCheckout(false);
-            setSelectedProduct(null);
-          },
-          onPending: (result) => {
-            toast({ title: 'Pembayaran Pending', description: 'Silakan selesaikan pembayaran Anda.' });
-          },
-          onError: (result) => {
-            toast({ title: 'Pembayaran Gagal', description: 'Terjadi kesalahan. Silakan coba lagi.', variant: 'destructive' });
-          },
-          onClose: () => {
-            console.log('Payment popup closed');
-          }
-        });
-      }
+      toast({
+        title: 'Hubungi Admin',
+        description: 'Untuk pembelian produk, silakan hubungi admin melalui WhatsApp atau email.',
+      });
+      setShowCheckout(false);
     } catch (error) {
       toast({
         title: 'Error',
-        description: error.response?.data?.detail || 'Gagal memproses checkout',
+        description: 'Gagal memproses checkout',
         variant: 'destructive'
       });
     } finally {
