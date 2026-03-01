@@ -105,7 +105,7 @@ const Wallet = () => {
     } catch (error) {
       toast({
         title: 'Error',
-        description: error.response?.data?.detail || 'Gagal membuat top-up',
+        description: getErrorMsg(error, 'Gagal membuat top-up'),
         variant: 'destructive'
       });
     } finally {
@@ -143,7 +143,7 @@ const Wallet = () => {
     } catch (error) {
       toast({
         title: 'Error',
-        description: error.response?.data?.detail || 'Gagal top-up',
+        description: getErrorMsg(error, 'Gagal top-up'),
         variant: 'destructive'
       });
     } finally {
