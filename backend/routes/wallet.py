@@ -57,67 +57,15 @@ async def get_transactions(user_id: str, limit: int = 20):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# Create top-up with Midtrans QRIS
+# Create top-up (manual/proof based)
 @router.post("/topup")
 async def create_topup(request: TopUpRequest):
     try:
         order_id = f"TOPUP-{request.userId[:8]}-{int(datetime.utcnow().timestamp())}"
-        
-        # Get user info
         user = await db.users.find_one({"_id": ObjectId(request.userId)})
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
-        
-        # Create Midtrans transaction
-        auth_string = base64.b64encode(f"{MIDTRANS_SERVER_KEY}:".encode()).decode()
-        
-        payload = {
-            "payment_type": "qris",
-            "transaction_details": {
-                "order_id": order_id,
-                "gross_amount": request.amount
-            },
-            "customer_details": {
-                "first_name": user.get("fullName", "User"),
-                "email": user.get("email", "")
-            },
-            "qris": {
-                "acquirer": "gopay"
-            }
-        }
-        
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                f"{MIDTRANS_API_URL}/v2/charge",
-                json=payload,
-                headers={
-                    "Authorization": f"Basic {auth_string}",
-                    "Content-Type": "application/json",
-                    "Accept": "application/json"
-                }
-            )
-            
-            result = response.json()
-        
-        if response.status_code != 200 and response.status_code != 201:
-            # Fallback for sandbox/demo mode
-            result = {
-                "status_code": "201",
-                "status_message": "QRIS transaction is created",
-                "transaction_id": f"demo-{order_id}",
-                "order_id": order_id,
-                "gross_amount": str(request.amount),
-                "payment_type": "qris",
-                "transaction_status": "pending",
-                "actions": [
-                    {
-                        "name": "generate-qr-code",
-                        "url": f"https://api.sandbox.midtrans.com/v2/qris/{order_id}/qr-code"
-                    }
-                ],
-                "qr_string": "00020101021226670016COM.NOBUBANK.WWW01telepin30"
-            }
-        
+
         # Save pending transaction
         transaction = {
             "userId": request.userId,
@@ -125,20 +73,16 @@ async def create_topup(request: TopUpRequest):
             "amount": request.amount,
             "type": "topup",
             "status": "pending",
-            "paymentMethod": "qris",
-            "midtransResponse": result,
+            "paymentMethod": "manual",
             "createdAt": datetime.utcnow()
         }
         await db.wallet_transactions.insert_one(transaction)
-        
+
         return {
             "orderId": order_id,
             "amount": request.amount,
-            "qrCode": result.get("actions", [{}])[0].get("url") if result.get("actions") else None,
-            "qrString": result.get("qr_string"),
             "status": "pending",
-            "expiryTime": result.get("expiry_time"),
-            "midtransResponse": result
+            "message": "Top-up sedang diproses. Hubungi admin untuk konfirmasi."
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
