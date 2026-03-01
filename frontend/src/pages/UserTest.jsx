@@ -231,25 +231,8 @@ const UserTest = () => {
   };
 
   const submitTest = async () => {
-    // Calculate results
-    let totalScore = 0;
-    let categories = {};
-    
-    questions.forEach(q => {
-      const answer = answers[q._id];
-      if (answer) {
-        const selectedOption = q.options?.find(opt => opt.value === answer);
-        if (selectedOption) {
-          totalScore += selectedOption.score || 0;
-          const cat = q.category || 'general';
-          categories[cat] = (categories[cat] || 0) + (selectedOption.score || 0);
-        }
-      }
-    });
-
+    // Build simple result summary on frontend
     const result = {
-      totalScore,
-      categories,
       answeredCount: Object.keys(answers).length,
       totalQuestions: questions.length,
       testType,
@@ -259,21 +242,19 @@ const UserTest = () => {
     setResults(result);
     setTestCompleted(true);
 
-    // Save results to backend
+    // Save results to backend (backend does full analysis)
     try {
       const saveResponse = await axios.post(`${BACKEND_URL}/api/test-results`, {
         userId: user._id || user.id,
         testType,
         results: result,
-        answers
+        answers   // {questionId: optionIndex}
+      }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('user_token')}` }
       });
-      
-      // Mark free test as used
-      if (testType === 'free') {
-        setHasUsedFreeTest(true);
-      }
-      
-      // Redirect to result page with the result ID
+
+      if (testType === 'free') setHasUsedFreeTest(true);
+
       if (saveResponse.data.resultId) {
         navigate(`/test-result/${saveResponse.data.resultId}`);
         return;
