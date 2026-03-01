@@ -236,30 +236,42 @@ const UserDashboard = () => {
   };
 
   const handleCreateQRIS = async () => {
-    // QRIS generation removed - use bank transfer or E-Wallet manual upload instead
-    toast({
-      title: 'Info',
-      description: 'Pilih Transfer Bank atau E-Wallet, lakukan pembayaran, lalu upload bukti bayar.',
-    });
-  };
-
-  const handleCheckPaymentStatus = async (orderId) => {
-    if (checkingPayment) return;
-    
-    setCheckingPayment(true);
+    setLoadingQris(true);
     try {
-      const response = await userPaymentsAPI.checkPayment(orderId);
-      
-      if (response.data.status === 'settlement') {
-        toast({
-          title: 'Pembayaran Berhasil!',
-          description: 'Pembayaran Anda telah dikonfirmasi'
-        });
-        setQrisData(null);
-        await loadUserData();
+      const response = await userPaymentsAPI.createQRIS();
+      if (response.data.success) {
+        setQrisData(response.data.data);
+        if (!response.data.already_pending) {
+          toast({ title: 'QRIS Dibuat!', description: 'Scan QR code untuk membayar' });
+        }
+      } else {
+        throw new Error(response.data.message || 'Gagal membuat QRIS');
       }
     } catch (error) {
-      console.error('Error checking payment:', error);
+      toast({
+        title: 'Gagal Generate QRIS',
+        description: getErrorMsg(error, 'Gagal membuat transaksi QRIS. Coba lagi.'),
+        variant: 'destructive'
+      });
+    } finally {
+      setLoadingQris(false);
+    }
+  };
+
+  const handleCheckQRISStatus = async () => {
+    if (!qrisData?.unique_code || checkingPayment) return;
+    setCheckingPayment(true);
+    try {
+      const response = await userPaymentsAPI.checkQRIS(qrisData.unique_code);
+      if (response.data.paid) {
+        toast({ title: 'Pembayaran Berhasil!', description: 'Akses premium telah aktif.' });
+        setQrisData(null);
+        await loadUserData();
+      } else {
+        toast({ title: 'Belum Terbayar', description: `Status: ${response.data.status}` });
+      }
+    } catch (error) {
+      console.error('Check QRIS error:', error);
     } finally {
       setCheckingPayment(false);
     }
