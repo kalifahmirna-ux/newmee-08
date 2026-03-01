@@ -94,7 +94,7 @@ async def register_yayasan(data: YayasanCreate, request: Request):
         
         # Get default test price from settings
         settings = await db.settings.find_one()
-        default_price = settings.get("paymentAmount", 50000) if settings else 50000
+        default_price = settings.get("paymentAmount", 100000) if settings else 50000
         
         yayasan_doc = {
             "name": data.name,
@@ -167,7 +167,7 @@ async def login_yayasan(credentials: YayasanLogin, request: Request):
                 "name": yayasan["name"],
                 "email": yayasan["email"],
                 "referralCode": yayasan["referralCode"],
-                "referralPrice": yayasan.get("referralPrice", 50000),
+                "referralPrice": yayasan.get("referralPrice", 100000),
                 "discountPercentage": yayasan.get("discountPercentage", 0),
                 "totalReferrals": yayasan.get("totalReferrals", 0),
                 "totalEarnings": yayasan.get("totalEarnings", 0),
@@ -191,7 +191,7 @@ async def get_yayasan_profile(current_yayasan: dict = Depends(get_current_yayasa
         "address": current_yayasan.get("address"),
         "description": current_yayasan.get("description"),
         "referralCode": current_yayasan["referralCode"],
-        "referralPrice": current_yayasan.get("referralPrice", 50000),
+        "referralPrice": current_yayasan.get("referralPrice", 100000),
         "discountPercentage": current_yayasan.get("discountPercentage", 0),
         "totalReferrals": current_yayasan.get("totalReferrals", 0),
         "totalEarnings": current_yayasan.get("totalEarnings", 0),
@@ -282,7 +282,7 @@ async def get_yayasan_dashboard_stats(current_yayasan: dict = Depends(get_curren
             user["_id"] = str(user["_id"])
         
         # Calculate earnings
-        referral_price = current_yayasan.get("referralPrice", 50000)
+        referral_price = current_yayasan.get("referralPrice", 100000)
         total_earnings = paid_users * (referral_price * 0.1)  # 10% commission
         
         return {
@@ -349,7 +349,7 @@ async def check_yayasan_referral(code: str):
         return {
             "isYayasan": True,
             "yayasanName": yayasan["name"],
-            "referralPrice": yayasan.get("referralPrice", 50000),
+            "referralPrice": yayasan.get("referralPrice", 100000),
             "discountPercentage": yayasan.get("discountPercentage", 0),
             "message": f"Kode referral dari {yayasan['name']}"
         }
