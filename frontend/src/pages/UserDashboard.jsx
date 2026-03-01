@@ -227,36 +227,11 @@ const UserDashboard = () => {
   };
 
   const handleCreateQRIS = async () => {
-    setLoadingQris(true);
-    try {
-      const response = await userPaymentsAPI.createQRIS();
-      
-      if (response.data.success) {
-        setQrisData(response.data);
-        toast({
-          title: 'QRIS Dibuat!',
-          description: 'Scan QR code untuk melanjutkan pembayaran'
-        });
-        
-        // Auto check payment status every 5 seconds
-        const interval = setInterval(async () => {
-          await handleCheckPaymentStatus(response.data.orderId);
-        }, 5000);
-        
-        // Clear interval after 1 hour (expiry time)
-        setTimeout(() => {
-          clearInterval(interval);
-        }, 60 * 60 * 1000);
-      }
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: error.response?.data?.detail || 'Gagal membuat QRIS payment',
-        variant: 'destructive'
-      });
-    } finally {
-      setLoadingQris(false);
-    }
+    // QRIS generation removed - use bank transfer or E-Wallet manual upload instead
+    toast({
+      title: 'Info',
+      description: 'Pilih Transfer Bank atau E-Wallet, lakukan pembayaran, lalu upload bukti bayar.',
+    });
   };
 
   const handleCheckPaymentStatus = async (orderId) => {
