@@ -970,27 +970,99 @@ const UserDashboard = () => {
                       </div>
                     )}
 
-                    {/* E-Wallet / QRIS Info */}
-                    {paymentMethod === 'ewallet' && (
-                      <div className="bg-[#1a1a1a] rounded-lg p-4 space-y-3">
-                        <p className="text-yellow-400 font-semibold">Pembayaran E-Wallet / QRIS</p>
-                        <p className="text-gray-400 text-sm">
-                          Lakukan pembayaran via E-Wallet (GoPay, OVO, DANA, ShopeePay) atau QRIS ke:
-                        </p>
-                        <div>
-                          <p className="text-gray-400 text-sm">Nama Merchant</p>
-                          <p className="text-white font-semibold">{settings?.bankAccountName || 'NEWME CLASS'}</p>
-                        </div>
-                        {settings?.paymentInstructions && (
-                          <div className="mt-3 pt-3 border-t border-gray-700">
-                            <p className="text-gray-400 text-sm whitespace-pre-line">{settings.paymentInstructions}</p>
+                    {/* QRIS PayDisini */}
+                    {paymentMethod === 'qris' && (
+                      <div className="bg-[#1a1a1a] rounded-lg p-4 space-y-4">
+                        <p className="text-yellow-400 font-semibold text-center">Pembayaran QRIS</p>
+
+                        {!qrisData ? (
+                          <div className="text-center space-y-3">
+                            <p className="text-gray-400 text-sm">
+                              Generate QR Code untuk bayar via GoPay, OVO, DANA, ShopeePay, atau m-banking.
+                            </p>
+                            <button
+                              onClick={handleCreateQRIS}
+                              disabled={loadingQris}
+                              className="w-full py-3 bg-yellow-400 text-black font-semibold rounded-lg hover:bg-yellow-500 transition disabled:opacity-60 flex items-center justify-center gap-2"
+                              data-testid="btn-generate-qris"
+                            >
+                              {loadingQris ? (
+                                <>
+                                  <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                                  Membuat QRIS...
+                                </>
+                              ) : 'Generate QRIS Code'}
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            {/* QR Image dari qr_url */}
+                            <div className="text-center">
+                              <p className="text-white font-semibold mb-3">
+                                Bayar Rp {Number(qrisData.amount || 0).toLocaleString('id-ID')}
+                              </p>
+                              {qrisData.qr_url ? (
+                                <div className="bg-white p-3 rounded-xl inline-block">
+                                  <img
+                                    src={qrisData.qr_url}
+                                    alt="QRIS Code"
+                                    className="w-56 h-56 mx-auto"
+                                    onError={(e) => { e.target.style.display = 'none'; }}
+                                  />
+                                </div>
+                              ) : qrisData.qr_content ? (
+                                /* Fallback: render QR dari qr_content menggunakan API publik */
+                                <div className="bg-white p-3 rounded-xl inline-block">
+                                  <img
+                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=224x224&data=${encodeURIComponent(qrisData.qr_content)}`}
+                                    alt="QRIS Code"
+                                    className="w-56 h-56 mx-auto"
+                                  />
+                                </div>
+                              ) : null}
+                              <p className="text-gray-400 text-xs mt-2">
+                                Berlaku 5 menit · Scan via e-wallet atau m-banking
+                              </p>
+                            </div>
+
+                            {/* Checkout URL */}
+                            {(qrisData.checkout_url || qrisData.checkout_url_beta) && (
+                              <a
+                                href={qrisData.checkout_url || qrisData.checkout_url_beta}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block w-full py-2 text-center border border-yellow-400/50 text-yellow-400 rounded-lg hover:bg-yellow-400/10 transition text-sm"
+                                data-testid="qris-checkout-link"
+                              >
+                                Bayar via Link Checkout
+                              </a>
+                            )}
+
+                            {/* Cek Status */}
+                            <button
+                              onClick={handleCheckQRISStatus}
+                              disabled={checkingPayment}
+                              className="w-full py-2 border border-green-500/50 text-green-400 rounded-lg hover:bg-green-500/10 transition text-sm flex items-center justify-center gap-2 disabled:opacity-60"
+                              data-testid="btn-check-qris-status"
+                            >
+                              {checkingPayment ? (
+                                <>
+                                  <div className="w-4 h-4 border-2 border-green-400 border-t-transparent rounded-full animate-spin" />
+                                  Mengecek...
+                                </>
+                              ) : (
+                                <><CheckCircle className="w-4 h-4" /> Sudah Bayar? Cek Status</>
+                              )}
+                            </button>
+
+                            <button
+                              onClick={() => setQrisData(null)}
+                              className="w-full text-gray-500 hover:text-gray-400 text-xs underline"
+                            >
+                              Buat QRIS Baru
+                            </button>
                           </div>
                         )}
-                        <div className="bg-yellow-400/10 border border-yellow-400/30 rounded-lg p-3">
-                          <p className="text-yellow-400 text-xs">
-                            Setelah transfer, upload screenshot/foto bukti pembayaran di bawah
-                          </p>
-                        </div>
                       </div>
                     )}
                   </CardContent>
