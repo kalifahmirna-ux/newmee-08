@@ -51,6 +51,10 @@ import YayasanLogin from './pages/yayasan/YayasanLogin';
 import YayasanRegister from './pages/yayasan/YayasanRegister';
 import { Toaster } from './components/ui/toaster';
 
+// Export API config for other components
+export const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+export const API = `${BACKEND_URL}/api`;
+
 // Component to handle maintenance mode check
 const AppContent = () => {
   const { settings, loading } = useTheme();
