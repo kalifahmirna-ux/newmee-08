@@ -4,19 +4,11 @@ from typing import Optional
 from database import get_db
 from datetime import datetime
 from bson import ObjectId
-import httpx
-import base64
 import hashlib
 import os
 
 router = APIRouter(prefix="/api/wallet", tags=["wallet"])
 db = get_db()
-
-# Midtrans Config
-MIDTRANS_SERVER_KEY = os.environ.get("MIDTRANS_SERVER_KEY", "SB-Mid-server-YOUR_KEY")
-MIDTRANS_CLIENT_KEY = os.environ.get("MIDTRANS_CLIENT_KEY", "SB-Mid-client-YOUR_KEY")
-MIDTRANS_IS_PRODUCTION = os.environ.get("MIDTRANS_IS_PRODUCTION", "false").lower() == "true"
-MIDTRANS_API_URL = "https://api.midtrans.com" if MIDTRANS_IS_PRODUCTION else "https://api.sandbox.midtrans.com"
 
 class TopUpRequest(BaseModel):
     amount: int
