@@ -922,17 +922,17 @@ const UserDashboard = () => {
                           <p className={`text-sm ${paymentMethod === 'bank' ? 'text-yellow-400' : 'text-gray-400'}`}>Transfer Bank</p>
                         </button>
                         <button
-                          onClick={() => setPaymentMethod('qris')}
+                          onClick={() => setPaymentMethod('ewallet')}
                           className={`p-4 rounded-lg border-2 transition ${
-                            paymentMethod === 'qris' 
+                            paymentMethod === 'ewallet' 
                               ? 'border-yellow-400 bg-yellow-400/10' 
                               : 'border-gray-600 hover:border-gray-500'
                           }`}
                         >
-                          <div className={`w-8 h-8 mx-auto mb-2 flex items-center justify-center ${paymentMethod === 'qris' ? 'text-yellow-400' : 'text-gray-400'}`}>
-                            <span className="text-xs font-bold">QRIS</span>
+                          <div className={`w-8 h-8 mx-auto mb-2 flex items-center justify-center ${paymentMethod === 'ewallet' ? 'text-yellow-400' : 'text-gray-400'}`}>
+                            <span className="text-xs font-bold">E-Wallet</span>
                           </div>
-                          <p className={`text-sm ${paymentMethod === 'qris' ? 'text-yellow-400' : 'text-gray-400'}`}>QRIS Payment</p>
+                          <p className={`text-sm ${paymentMethod === 'ewallet' ? 'text-yellow-400' : 'text-gray-400'}`}>E-Wallet / QRIS</p>
                         </button>
                       </div>
                     </div>
