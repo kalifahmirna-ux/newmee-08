@@ -66,53 +66,155 @@ async def save_test_result(submission: TestResultSubmission):
 
 
 async def generate_test_analysis(answers: dict, test_type: str) -> dict:
-    """Generate personality analysis based on answers"""
-    
-    # Calculate category scores
-    category_totals = {}
-    category_counts = {}
-    
-    for question_id, answer_value in answers.items():
+    """
+    Generate personality analysis based on answers.
+    answers format: {questionId: optionIndex}  (index 0-based)
+    Questions use 'scores' dict: {"extrovert": 5, "api": 3, ...}
+    """
+    # Dimension accumulators
+    dims = {}
+
+    for question_id, option_index in answers.items():
         try:
             question = await db.questions.find_one({"_id": ObjectId(question_id)})
-            if question:
-                category = question.get("category", "general")
-                option = next((o for o in question.get("options", []) if o["value"] == answer_value), None)
-                if option:
-                    if category not in category_totals:
-                        category_totals[category] = 0
-                        category_counts[category] = 0
-                    category_totals[category] += option.get("score", 0)
-                    category_counts[category] += 1
-        except:
+            if not question:
+                continue
+            options = question.get("options", [])
+            # support both index-based and text-based answer
+            if isinstance(option_index, int) and 0 <= option_index < len(options):
+                option = options[option_index]
+            else:
+                # try match by text fallback
+                option = next((o for o in options if o.get("text") == option_index), None)
+            if not option:
+                continue
+
+            scores = option.get("scores", {})
+            weight = float(question.get("weight", 1.0))
+            for dim, val in scores.items():
+                dims[dim] = dims.get(dim, 0) + (val * weight)
+        except Exception:
             continue
-    
-    # Calculate percentages
-    category_analysis = {}
-    for cat, total in category_totals.items():
-        max_possible = category_counts[cat] * 4  # assuming max score per question is 4
-        percentage = (total / max_possible * 100) if max_possible > 0 else 0
-        category_analysis[cat] = {
-            "score": total,
-            "maxScore": max_possible,
-            "percentage": round(percentage, 1)
-        }
-    
-    # Determine dominant traits
-    dominant_category = max(category_totals.keys(), key=lambda k: category_totals[k]) if category_totals else "general"
-    
-    # Personality type based on dominant category and scores
-    personality_insights = get_personality_insights(category_analysis, dominant_category)
-    
+
+    # ── Dominant element (5 Elemen) ──
+    elements = {k: dims.get(k, 0) for k in ["kayu", "api", "tanah", "logam", "air"]}
+    dominant_element = max(elements, key=elements.get)
+
+    # ── Personality type (introvert vs extrovert) ──
+    intro = dims.get("introvert", 0)
+    extro = dims.get("extrovert", 0)
+    personality_type = "Introvert" if intro >= extro else "Extrovert"
+    if abs(intro - extro) < 5:
+        personality_type = "Ambivert"
+
+    # ── Dominant interest ──
+    interest_keys = ["analitik", "sosial", "praktis", "artistik", "enterprising", "investigatif"]
+    interests = {k: dims.get(k, 0) for k in interest_keys}
+    dominant_interest = max(interests, key=interests.get)
+
+    # ── Dominant talent ──
+    talent_keys = ["komunikasi", "empati", "kinestetik", "logika", "musikal", "visual"]
+    talents = {k: dims.get(k, 0) for k in talent_keys}
+    dominant_talent = max(talents, key=talents.get)
+
+    # ── Build rich insights ──
+    insights = build_insights(dominant_element, personality_type, dominant_interest, dominant_talent, dims)
+
     return {
-        "categoryAnalysis": category_analysis,
-        "dominantCategory": dominant_category,
-        "personalityType": personality_insights["type"],
-        "strengths": personality_insights["strengths"],
-        "areasToImprove": personality_insights["areasToImprove"],
-        "careerRecommendations": personality_insights["careerRecommendations"],
-        "summary": personality_insights["summary"],
-        "testType": test_type
+        "dominantElement": dominant_element,
+        "personalityType": personality_type,
+        "dominantInterest": dominant_interest,
+        "dominantTalent": dominant_talent,
+        "elementScores": elements,
+        "interestScores": interests,
+        "talentScores": talents,
+        "allDimensions": {k: round(v, 1) for k, v in dims.items()},
+        "insights": insights,
+        "testType": test_type,
+        # backward compat
+        "dominant_element": dominant_element,
+        "personality_type": personality_type,
+        "strengths": insights["strengths"],
+        "areasToImprove": insights["areasToImprove"],
+        "careerRecommendations": insights["careerRecommendations"],
+        "summary": insights["summary"],
+    }
+
+
+def build_insights(element: str, personality: str, interest: str, talent: str, dims: dict) -> dict:
+    """Build detailed personality insights"""
+
+    element_data = {
+        "kayu": {
+            "label": "KAYU (Wood)", "symbol": "🌿",
+            "desc": "Kreatif, penuh visi, inovatif, dan selalu mencari pertumbuhan.",
+            "kekuatan": ["Kreativitas tinggi", "Pemikiran visioner", "Inovasi & ide segar", "Kemampuan memulai hal baru"],
+            "tantangan": ["Sulit menyelesaikan sesuatu", "Mudah terdistraksi", "Terlalu idealis"],
+        },
+        "api": {
+            "label": "API (Fire)", "symbol": "🔥",
+            "desc": "Penuh semangat, karismatik, pemimpin alami, dan energik.",
+            "kekuatan": ["Kepemimpinan natural", "Semangat menular", "Kemampuan motivasi", "Berani mengambil risiko"],
+            "tantangan": ["Mudah terbakar emosi", "Impulsif", "Sulit sabar"],
+        },
+        "tanah": {
+            "label": "TANAH (Earth)", "symbol": "🌍",
+            "desc": "Stabil, dapat diandalkan, praktis, dan berorientasi pada fakta.",
+            "kekuatan": ["Sangat bisa diandalkan", "Konsistensi tinggi", "Praktis & realistis", "Stabilitas emosi"],
+            "tantangan": ["Sulit berubah", "Terlalu konservatif", "Cenderung kaku"],
+        },
+        "logam": {
+            "label": "LOGAM (Metal)", "symbol": "⚡",
+            "desc": "Adaptif, komunikatif, fleksibel, dan pandai bergaul.",
+            "kekuatan": ["Mudah beradaptasi", "Komunikasi excellent", "Network luas", "Fleksibel & kreatif"],
+            "tantangan": ["Kurang fokus", "Mudah bosan", "Tidak konsisten"],
+        },
+        "air": {
+            "label": "AIR (Water)", "symbol": "💧",
+            "desc": "Bijaksana, intuitif, reflektif, dan memiliki empati mendalam.",
+            "kekuatan": ["Kebijaksanaan mendalam", "Intuisi tajam", "Empati tinggi", "Pemikir strategis"],
+            "tantangan": ["Terlalu introspektif", "Sulit membuat keputusan cepat", "Overthinking"],
+        },
+    }
+
+    interest_careers = {
+        "analitik": ["Data Scientist", "Financial Analyst", "Business Analyst", "Research Scientist", "Statistician"],
+        "sosial": ["Konselor/Psikolog", "HR Manager", "Social Worker", "Teacher/Trainer", "Community Manager"],
+        "praktis": ["Engineer", "Dokter/Perawat", "Chef/Culinary", "Teknisi", "Arsitek"],
+        "artistik": ["Graphic Designer", "Musisi/Seniman", "Content Creator", "UX/UI Designer", "Fotografer"],
+        "enterprising": ["Entrepreneur", "Sales Manager", "Marketing Director", "Business Development", "CEO/Founder"],
+        "investigatif": ["Peneliti/Scientist", "Programmer/Developer", "Dokter Spesialis", "Detektif/Investigator", "Profesor"],
+    }
+
+    talent_descriptions = {
+        "komunikasi": "kemampuan berbicara dan menyampaikan ide secara efektif",
+        "empati": "kepekaan tinggi terhadap perasaan dan kebutuhan orang lain",
+        "kinestetik": "koordinasi fisik dan kecerdasan gerakan yang unggul",
+        "logika": "kemampuan berpikir sistematis dan memecahkan masalah kompleks",
+        "musikal": "kepekaan terhadap ritme, nada, dan ekspresi musikal",
+        "visual": "kemampuan visualisasi, estetika, dan desain yang kuat",
+    }
+
+    el = element_data.get(element, element_data["air"])
+    careers = interest_careers.get(interest, ["Profesional di bidang yang diminati"])
+    talent_desc = talent_descriptions.get(talent, talent)
+
+    summary = (
+        f"Anda adalah pribadi dengan karakter dominan {el['label']} — {el['desc']} "
+        f"Sebagai seorang {personality}, Anda lebih suka {('bekerja sendiri dan merenung' if personality == 'Introvert' else 'berkolaborasi dan berinteraksi')}. "
+        f"Bakat terkuat Anda adalah {talent_desc}."
+    )
+
+    return {
+        "elementLabel": el["label"],
+        "elementSymbol": el["symbol"],
+        "elementDescription": el["desc"],
+        "personalityLabel": personality,
+        "strengths": el["kekuatan"],
+        "areasToImprove": el["tantangan"],
+        "careerRecommendations": careers,
+        "talentDescription": talent_desc,
+        "summary": summary,
     }
 
 
