@@ -1,416 +1,333 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { 
-  Trophy, Star, Target, Briefcase, Lightbulb, Download, Share2,
-  ArrowLeft, CheckCircle, Brain, Heart, Zap, Users, Award,
-  ChevronRight, Sparkles, TrendingUp
-} from 'lucide-react';
-import { Button } from '../components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
-import { Progress } from '../components/ui/progress';
-import { useToast } from '../hooks/use-toast';
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-const TestResult = () => {
-  const { resultId } = useParams();
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const [loading, setLoading] = useState(true);
-  const [result, setResult] = useState(null);
-  const [showCertificatePrompt, setShowCertificatePrompt] = useState(false);
+// ── helper ──────────────────────────────────────────────────
+const pct = (val, max) => max > 0 ? Math.round((val / max) * 100) : 0;
 
-  useEffect(() => {
-    if (resultId) {
-      loadResult();
-    }
-  }, [resultId]);
+const ELEM_COLORS = {
+  kayu: '#4CAF50', api: '#FF5722', tanah: '#FFC107',
+  logam: '#9E9E9E', air: '#2196F3',
+};
+const ELEM_EN = {
+  kayu: 'Wood', api: 'Fire', tanah: 'Earth', logam: 'Metal', air: 'Water',
+};
 
-  const loadResult = async () => {
-    try {
-      const response = await axios.get(`${BACKEND_URL}/api/test-results/${resultId}`);
-      setResult(response.data);
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Gagal memuat hasil test',
-        variant: 'destructive'
-      });
-      navigate('/user-test');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const downloadCertificate = async () => {
-    try {
-      const token = localStorage.getItem('user_token');
-      const response = await axios.get(`${BACKEND_URL}/api/certificates/download-ai-certificate`, {
-        headers: { Authorization: `Bearer ${token}` },
-        responseType: 'blob'
-      });
-      
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `sertifikat_newmeclass_${Date.now()}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      
-      toast({
-        title: 'Berhasil',
-        description: 'Sertifikat berhasil diunduh'
-      });
-    } catch (error) {
-      if (error.response?.status === 403) {
-        setShowCertificatePrompt(true);
-      } else {
-        toast({
-          title: 'Error',
-          description: error.response?.data?.detail || 'Gagal mengunduh sertifikat',
-          variant: 'destructive'
-        });
-      }
-    }
-  };
-
-  const shareResult = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: 'Hasil Test Kepribadian NEWMECLASS',
-        text: `Saya baru saja menyelesaikan test kepribadian dan mendapatkan hasil: ${result?.analysis?.personalityType}`,
-        url: window.location.href
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      toast({
-        title: 'Link Disalin',
-        description: 'Link hasil test telah disalin ke clipboard'
-      });
-    }
-  };
-
-  const getCategoryIcon = (category) => {
-    const icons = {
-      personality: <Heart className="w-5 h-5" />,
-      talent: <Zap className="w-5 h-5" />,
-      skills: <Target className="w-5 h-5" />,
-      interest: <Lightbulb className="w-5 h-5" />,
-      general: <Brain className="w-5 h-5" />
-    };
-    return icons[category] || icons.general;
-  };
-
-  const getCategoryColor = (category) => {
-    const colors = {
-      personality: 'from-pink-500 to-rose-500',
-      talent: 'from-yellow-500 to-orange-500',
-      skills: 'from-blue-500 to-indigo-500',
-      interest: 'from-green-500 to-emerald-500',
-      general: 'from-purple-500 to-violet-500'
-    };
-    return colors[category] || colors.general;
-  };
-
-  const getCategoryLabel = (category) => {
-    const labels = {
-      personality: 'Kepribadian',
-      talent: 'Bakat',
-      skills: 'Kemampuan',
-      interest: 'Minat',
-      general: 'Umum'
-    };
-    return labels[category] || category;
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-[#1a1a1a] to-[#2a2a2a] flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-yellow-400">Memuat hasil test...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!result) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-[#1a1a1a] to-[#2a2a2a] flex items-center justify-center">
-        <Card className="bg-[#2a2a2a] border-red-500/30 max-w-md">
-          <CardContent className="p-6 text-center">
-            <p className="text-white mb-4">Hasil test tidak ditemukan</p>
-            <Link to="/user-test">
-              <Button className="bg-yellow-400 text-black">Kembali ke Test</Button>
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  const analysis = result.analysis || {};
-  const categoryAnalysis = analysis.categoryAnalysis || {};
-
+// ── PersonalityCode badge ────────────────────────────────────
+function CodeBadge({ code }) {
+  const prefix = code?.[0] || 'e';
+  const suffix = code?.[1] || 'K';
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#1a1a1a] to-[#2a2a2a] py-8" data-testid="test-result-page">
-      <div className="max-w-4xl mx-auto px-4">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <Link to="/user-test">
-            <Button variant="outline" className="border-yellow-400 text-yellow-400">
-              <ArrowLeft className="w-4 h-4 mr-2" /> Kembali
-            </Button>
-          </Link>
-          <div className="flex gap-2">
-            <Button 
-              onClick={shareResult}
-              variant="outline" 
-              className="border-yellow-400/50 text-yellow-400"
-            >
-              <Share2 className="w-4 h-4 mr-2" /> Share
-            </Button>
-            {result.testType === 'paid' && (
-              <Button 
-                onClick={downloadCertificate}
-                className="bg-yellow-400 text-black"
-              >
-                <Download className="w-4 h-4 mr-2" /> Sertifikat
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {/* Main Result Card */}
-        <Card className="bg-gradient-to-br from-yellow-400/20 to-yellow-600/10 border-yellow-400/30 mb-6 overflow-hidden">
-          <div className="absolute top-0 right-0 w-40 h-40 bg-yellow-400/10 rounded-full blur-3xl"></div>
-          <CardHeader className="text-center relative z-10">
-            <div className="w-24 h-24 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-yellow-400/30">
-              <Trophy className="w-12 h-12 text-[#1a1a1a]" />
-            </div>
-            <CardTitle className="text-white text-3xl mb-2">Test Selesai!</CardTitle>
-            <CardDescription className="text-gray-300 text-lg">
-              {result.testType === 'free' ? '5 Test Dasar Gratis' : 'Test Berbayar Premium'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="text-center pb-8">
-            <div className="inline-block bg-[#1a1a1a]/50 rounded-2xl px-8 py-4 mb-4">
-              <p className="text-yellow-400 text-sm mb-1">Tipe Kepribadian Anda</p>
-              <p className="text-white text-2xl font-bold">{analysis.personalityType || 'Analitis'}</p>
-            </div>
-            <div className="flex justify-center gap-8 text-center">
-              <div>
-                <p className="text-3xl font-bold text-white">{result.answeredCount || 0}</p>
-                <p className="text-gray-400 text-sm">Pertanyaan Dijawab</p>
-              </div>
-              <div>
-                <p className="text-3xl font-bold text-yellow-400">{result.totalScore || 0}</p>
-                <p className="text-gray-400 text-sm">Total Skor</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Category Scores */}
-        {Object.keys(categoryAnalysis).length > 0 && (
-          <Card className="bg-[#2a2a2a] border-yellow-400/20 mb-6">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-yellow-400" />
-                Analisis per Kategori
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {Object.entries(categoryAnalysis).map(([category, data]) => (
-                <div key={category} className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-8 h-8 rounded-full bg-gradient-to-r ${getCategoryColor(category)} flex items-center justify-center text-white`}>
-                        {getCategoryIcon(category)}
-                      </div>
-                      <span className="text-white font-medium">{getCategoryLabel(category)}</span>
-                    </div>
-                    <span className="text-yellow-400 font-semibold">{data.percentage}%</span>
-                  </div>
-                  <Progress value={data.percentage} className="h-2" />
-                  <p className="text-gray-400 text-sm">Skor: {data.score} / {data.maxScore}</p>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Strengths */}
-        {analysis.strengths && analysis.strengths.length > 0 && (
-          <Card className="bg-[#2a2a2a] border-green-500/20 mb-6">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Star className="w-5 h-5 text-green-500" />
-                Kekuatan Anda
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-2 gap-3">
-                {analysis.strengths.map((strength, index) => (
-                  <div 
-                    key={index}
-                    className="flex items-start gap-3 bg-green-500/10 rounded-lg p-3"
-                  >
-                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <p className="text-gray-300 text-sm">{strength}</p>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Areas to Improve */}
-        {analysis.areasToImprove && analysis.areasToImprove.length > 0 && (
-          <Card className="bg-[#2a2a2a] border-blue-500/20 mb-6">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Target className="w-5 h-5 text-blue-500" />
-                Area Pengembangan
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {analysis.areasToImprove.map((area, index) => (
-                  <div 
-                    key={index}
-                    className="flex items-center gap-3 bg-blue-500/10 rounded-lg p-3"
-                  >
-                    <ChevronRight className="w-5 h-5 text-blue-500 flex-shrink-0" />
-                    <p className="text-gray-300 text-sm">{area}</p>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Career Recommendations */}
-        {analysis.careerRecommendations && analysis.careerRecommendations.length > 0 && (
-          <Card className="bg-[#2a2a2a] border-purple-500/20 mb-6">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Briefcase className="w-5 h-5 text-purple-500" />
-                Rekomendasi Karir
-              </CardTitle>
-              <CardDescription className="text-gray-400">
-                Berdasarkan hasil analisis, berikut karir yang cocok untuk Anda
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2">
-                {analysis.careerRecommendations.map((career, index) => (
-                  <span 
-                    key={index}
-                    className="px-4 py-2 bg-purple-500/20 text-purple-300 rounded-full text-sm border border-purple-500/30"
-                  >
-                    {career}
-                  </span>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Summary */}
-        {analysis.summary && (
-          <Card className="bg-gradient-to-r from-yellow-400/10 to-yellow-600/5 border-yellow-400/30 mb-6">
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-yellow-400/20 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Sparkles className="w-6 h-6 text-yellow-400" />
-                </div>
-                <div>
-                  <h3 className="text-yellow-400 font-semibold mb-2">Ringkasan</h3>
-                  <p className="text-gray-300 leading-relaxed">{analysis.summary}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Certificate Prompt for Free Test */}
-        {result.testType === 'free' && (
-          <Card className="bg-gradient-to-r from-yellow-400/20 to-orange-500/10 border-yellow-400/30 mb-6">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Award className="w-8 h-8 text-[#1a1a1a]" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-white font-semibold text-lg mb-1">
-                    Ingin Sertifikat Digital?
-                  </h3>
-                  <p className="text-gray-400 text-sm mb-3">
-                    Upgrade ke Test Berbayar untuk mendapatkan analisis mendalam dan sertifikat digital yang dapat dibagikan
-                  </p>
-                  <Link to="/user-test">
-                    <Button className="bg-yellow-400 text-black hover:bg-yellow-500">
-                      Ambil Test Berbayar <ChevronRight className="w-4 h-4 ml-1" />
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Actions */}
-        <div className="flex gap-3">
-          <Link to="/user-test" className="flex-1">
-            <Button className="w-full bg-yellow-400 hover:bg-yellow-500 text-black">
-              Test Lagi
-            </Button>
-          </Link>
-          <Link to="/dashboard" className="flex-1">
-            <Button variant="outline" className="w-full border-yellow-400 text-yellow-400">
-              Dashboard
-            </Button>
-          </Link>
-        </div>
-
-        {/* Certificate Upgrade Modal */}
-        {showCertificatePrompt && (
-          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-            <Card className="bg-[#2a2a2a] border-yellow-400/30 max-w-md w-full">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Award className="w-6 h-6 text-yellow-400" />
-                  Sertifikat Premium
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-gray-300">
-                  Sertifikat digital hanya tersedia untuk pengguna yang telah menyelesaikan Test Berbayar Premium.
-                </p>
-                <div className="flex gap-3">
-                  <Link to="/user-test" className="flex-1">
-                    <Button className="w-full bg-yellow-400 text-black">
-                      Ambil Test Premium
-                    </Button>
-                  </Link>
-                  <Button 
-                    variant="outline" 
-                    className="border-gray-500 text-gray-300"
-                    onClick={() => setShowCertificatePrompt(false)}
-                  >
-                    Tutup
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+    <div className="flex items-center justify-center">
+      <div
+        className="w-28 h-28 rounded-full border-4 border-yellow-400 flex items-center justify-center bg-white shadow-xl"
+        style={{ fontFamily: 'serif' }}
+      >
+        <span className="text-4xl font-black text-gray-800 tracking-tight">
+          <span className="text-yellow-500">{prefix}</span>
+          <span className="text-gray-900">{suffix}</span>
+        </span>
       </div>
     </div>
   );
-};
+}
 
-export default TestResult;
+// ── Element Score Bar ────────────────────────────────────────
+function ElementBar({ name, score, maxScore }) {
+  const p = pct(score, maxScore);
+  const color = ELEM_COLORS[name] || '#888';
+  return (
+    <div className="flex items-center gap-2 text-xs">
+      <span className="w-14 text-right text-gray-700 font-semibold capitalize">{name}</span>
+      <div className="flex-1 bg-gray-200 rounded-full h-2.5">
+        <div className="h-2.5 rounded-full" style={{ width: `${p}%`, backgroundColor: color }} />
+      </div>
+      <span className="w-8 text-gray-600 font-bold">{p}%</span>
+    </div>
+  );
+}
+
+// ── Main Component ───────────────────────────────────────────
+export default function TestResult() {
+  const { id } = useParams();
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const printRef = useRef();
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const token = localStorage.getItem('user_token');
+        const res = await axios.get(`${API}/test-results/${id}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
+        setResult(res.data);
+      } catch (e) {
+        setError('Hasil test tidak ditemukan.');
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [id]);
+
+  if (loading) return (
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <p className="text-yellow-600 animate-pulse text-lg font-semibold">Memuat hasil test...</p>
+    </div>
+  );
+
+  if (error || !result) return (
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center gap-4">
+      <p className="text-red-500">{error || 'Terjadi kesalahan'}</p>
+      <Link to="/dashboard" className="text-yellow-600 underline">Kembali ke Dashboard</Link>
+    </div>
+  );
+
+  const analysis = result.analysis || {};
+  const insights = analysis.insights || {};
+  const elem = (analysis.dominantElement || 'kayu').toLowerCase();
+  const elemColor = ELEM_COLORS[elem] || '#FFC107';
+  const elemScores = analysis.elementScores || {};
+  const maxElem = Math.max(...Object.values(elemScores), 1);
+  const ka = insights.kompilasiAdaptasi || {};
+  const karakter = insights.karakter || [];
+  const kj = insights.kekuatanJatidiri || {};
+  const keprib = insights.elementDescription || [];
+  const code = insights.code || '';
+  const ciriKhas = insights.ciriKhas || [];
+
+  return (
+    <div className="min-h-screen bg-gray-100 py-6 px-4">
+      {/* Action bar */}
+      <div className="max-w-4xl mx-auto mb-4 flex gap-3 justify-between items-center print:hidden">
+        <Link to="/dashboard" className="text-yellow-600 underline text-sm">← Dashboard</Link>
+        <div className="flex gap-2">
+          <button
+            onClick={() => window.print()}
+            className="px-4 py-2 bg-yellow-500 text-white rounded-lg text-sm font-semibold hover:bg-yellow-600 transition"
+          >
+            Cetak / Simpan PDF
+          </button>
+          <Link
+            to={`/certificate/${id}`}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 transition"
+          >
+            Download Sertifikat
+          </Link>
+        </div>
+      </div>
+
+      {/* ═══════ SERTIFIKAT ═══════ */}
+      <div
+        ref={printRef}
+        className="max-w-4xl mx-auto bg-white shadow-2xl"
+        style={{ fontFamily: 'Arial, sans-serif', border: '2px solid #d4af37' }}
+        data-testid="certificate-container"
+      >
+        {/* ── TOP DECORATION ── */}
+        <div className="flex">
+          {/* Left gold dots */}
+          <div className="w-16 bg-gray-900 relative overflow-hidden" style={{ minHeight: 90 }}>
+            <div className="absolute inset-0 opacity-40"
+              style={{ backgroundImage: 'radial-gradient(circle, #d4af37 1px, transparent 1px)', backgroundSize: '8px 8px' }} />
+          </div>
+          {/* Header content */}
+          <div className="flex-1 flex items-start justify-between p-4 border-b-2" style={{ borderColor: '#d4af37' }}>
+            {/* Logo placeholder */}
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full border-4 flex items-center justify-center overflow-hidden"
+                style={{ borderColor: elemColor }}>
+                <div className="grid grid-cols-2 gap-0.5 w-8 h-8">
+                  <div className="rounded-tl-full bg-red-500" />
+                  <div className="rounded-tr-full bg-yellow-500" />
+                  <div className="rounded-bl-full bg-blue-500" />
+                  <div className="rounded-br-full bg-green-500" />
+                </div>
+              </div>
+              <div>
+                <p className="font-black text-xl text-gray-900 leading-none">NEW ME</p>
+                <p className="text-xs text-gray-500 italic">Jatidiri di sini</p>
+              </div>
+            </div>
+
+            {/* Title */}
+            <div className="text-right">
+              <h1 className="text-xl font-black text-gray-900 leading-tight">SERTIFIKAT</h1>
+              <p className="text-xs font-bold text-gray-700">ANALISA KEPRIBADIAN & JATIDIRI</p>
+              <p className="text-xs text-gray-500 mt-1">
+                ID: <span className="font-mono font-bold">{id?.slice(-8).toUpperCase()}</span>
+              </p>
+              <p className="text-xs italic text-gray-500 mt-0.5">Optimalkan versi terbaik_mu</p>
+            </div>
+          </div>
+        </div>
+
+        {/* ── BODY: 2 columns ── */}
+        <div className="flex">
+          {/* ═══ LEFT COLUMN ═══ */}
+          <div className="flex-1 p-5 border-r" style={{ borderColor: '#e5e7eb' }}>
+
+            {/* Kepribadian */}
+            <section className="mb-4">
+              <h3 className="font-black text-sm text-gray-900 border-b pb-1 mb-2" style={{ borderColor: '#d4af37' }}>
+                Kepribadian :
+              </h3>
+              <p className="text-xs text-gray-700 leading-relaxed">
+                {Array.isArray(keprib) ? keprib.join(' - ') : keprib}
+              </p>
+            </section>
+
+            {/* Karakter */}
+            <section className="mb-4">
+              <h3 className="font-black text-sm text-gray-900 border-b pb-1 mb-2" style={{ borderColor: '#d4af37' }}>
+                +/- Karakter :
+              </h3>
+              <p className="text-xs text-gray-700 leading-relaxed">
+                {karakter.join(' - ')}
+              </p>
+            </section>
+
+            {/* Kekuatan Jatidiri */}
+            <section className="mb-4">
+              <h3 className="font-black text-sm text-gray-900 border-b pb-1 mb-1" style={{ borderColor: '#d4af37' }}>
+                Kekuatan Jatidiri :{' '}
+                <span className="text-yellow-600">{kj.tipe || 'Si UNIK'}</span>
+              </h3>
+              <div className="text-xs text-gray-700 space-y-0.5">
+                {kj.kehidupan && <p>Kehidupan : <strong>{kj.kehidupan}</strong> - Kesehatan : <strong>{kj.kesehatan}</strong></p>}
+                {kj.kontribusi && <p>Kontribusi : <strong>{kj.kontribusi}</strong> - Kekhasan : <strong>{kj.kekhasan}</strong> - Kharisma : <strong>{kj.kharisma}</strong></p>}
+              </div>
+            </section>
+
+            {/* Kompilasi Adaptasi */}
+            {Object.keys(ka).length > 0 && (
+              <section className="mb-4">
+                <h3 className="font-black text-sm text-gray-900 border-b pb-1 mb-2" style={{ borderColor: '#d4af37' }}>
+                  Kompilasi Adaptasi :
+                </h3>
+                <p className="text-xs text-gray-600 leading-relaxed" style={{ wordBreak: 'break-word' }}>
+                  {Object.entries(ka).map(([k, v]) =>
+                    `${k.replace(/([A-Z])/g, ' $1').trim()} : ${v}`
+                  ).join(' - ')}
+                </p>
+              </section>
+            )}
+
+            {/* Element Scores */}
+            <section>
+              <h3 className="font-black text-sm text-gray-900 border-b pb-1 mb-2" style={{ borderColor: '#d4af37' }}>
+                Skor 5 Elemen :
+              </h3>
+              <div className="space-y-1.5">
+                {Object.entries(elemScores)
+                  .sort(([, a], [, b]) => b - a)
+                  .map(([name, score]) => (
+                    <ElementBar key={name} name={name} score={score} maxScore={maxElem} />
+                  ))}
+              </div>
+            </section>
+          </div>
+
+          {/* ═══ RIGHT COLUMN ═══ */}
+          <div className="w-60 p-5 flex flex-col gap-4">
+
+            {/* Code Badge */}
+            <div className="text-center">
+              <CodeBadge code={code} />
+            </div>
+
+            {/* Kepribadian type */}
+            <section>
+              <h3 className="font-black text-xs text-gray-900 mb-1">Kepribadian :</h3>
+              <p className="text-base font-black" style={{ color: elemColor }}>
+                {insights.personalityLabel || analysis.personalityType || 'AMBIVERT'}
+              </p>
+            </section>
+
+            {/* Simbol Jatidiri */}
+            <section>
+              <h3 className="font-black text-xs text-gray-900 mb-1">Simbol Jatidiri :</h3>
+              <div className="text-xs space-y-1">
+                {Object.entries(elemScores)
+                  .sort(([, a], [, b]) => b - a)
+                  .slice(0, 3)
+                  .map(([name, score], i) => (
+                    <p key={name}>
+                      <span className="text-gray-500">Dominan {['I', 'II', 'III'][i]} :</span>{' '}
+                      <strong style={{ color: ELEM_COLORS[name] }}>{name.toUpperCase()}</strong>{' '}
+                      <span className="text-gray-600">{pct(score, maxElem)}%</span>
+                    </p>
+                  ))}
+              </div>
+            </section>
+
+            {/* Ciri Khas */}
+            {ciriKhas.length > 0 && (
+              <section>
+                <h3 className="font-black text-xs text-gray-900 mb-1">Ciri Khas :</h3>
+                <p className="text-xs text-gray-700">{ciriKhas.join(' - ')}</p>
+              </section>
+            )}
+
+            {/* Dibutuhkan Profesi */}
+            {insights.dibutuhkanPadaProfesi && (
+              <section>
+                <h3 className="font-black text-xs text-gray-900 mb-1">Dibutuhkan pada profesi :</h3>
+                <p className="text-xs text-gray-700 italic">{insights.dibutuhkanPadaProfesi}</p>
+              </section>
+            )}
+
+            {/* Test type badge */}
+            <div className="mt-auto">
+              <span className={`text-xs font-bold px-2 py-1 rounded-full ${
+                result.testType === 'paid'
+                  ? 'bg-yellow-100 text-yellow-700 border border-yellow-400'
+                  : 'bg-green-100 text-green-700 border border-green-400'
+              }`}>
+                {result.testType === 'paid' ? 'Test Premium' : 'Test Gratis'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* ── FOOTER ── */}
+        <div className="flex items-end justify-between px-5 py-4 border-t-2" style={{ borderColor: '#d4af37' }}>
+          <div>
+            <div className="w-24 border-b-2 border-gray-800 mb-1" />
+            <p className="text-xs font-bold text-gray-800">ABIE DIBYO</p>
+            <p className="text-xs text-gray-500">Chairman & B. Development</p>
+          </div>
+          <div className="text-center">
+            <p className="text-xs text-gray-400">
+              {new Date(result.completedAt || result.createdAt).toLocaleDateString('id-ID', {
+                day: 'numeric', month: 'long', year: 'numeric'
+              })}
+            </p>
+          </div>
+          {/* Right gold decoration */}
+          <div className="w-20 h-14 relative overflow-hidden rounded-lg"
+            style={{ background: 'linear-gradient(135deg, #1a1a1a 60%, #d4af37)' }}>
+            <p className="absolute bottom-1 right-2 text-yellow-400 text-xs font-bold">NEW ME</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Pesan untuk Free Test ── */}
+      {result.testType === 'free' && (
+        <div className="max-w-4xl mx-auto mt-4 bg-yellow-50 border border-yellow-400 rounded-xl p-4 print:hidden">
+          <p className="text-yellow-800 font-semibold text-sm text-center">
+            Ini adalah hasil Test Gratis. Untuk analisis lengkap, kompilasi adaptasi penuh, dan sertifikat resmi — upgrade ke <strong>Test Premium</strong>!
+          </p>
+          <div className="text-center mt-2">
+            <Link to="/test" className="inline-block px-6 py-2 bg-yellow-500 text-white rounded-lg font-bold hover:bg-yellow-600 transition text-sm">
+              Mulai Test Premium
+            </Link>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
