@@ -142,80 +142,72 @@ async def generate_test_analysis(answers: dict, test_type: str) -> dict:
 
 
 def build_insights(element: str, personality: str, interest: str, talent: str, dims: dict) -> dict:
-    """Build detailed personality insights"""
+    """Build detailed personality insights using personality_data.py"""
+    import sys
+    sys.path.insert(0, '/app/backend')
+    try:
+        from personality_data import PERSONALITY_DATA
+    except ImportError:
+        PERSONALITY_DATA = {}
 
-    element_data = {
-        "kayu": {
-            "label": "KAYU (Wood)", "symbol": "🌿",
-            "desc": "Kreatif, penuh visi, inovatif, dan selalu mencari pertumbuhan.",
-            "kekuatan": ["Kreativitas tinggi", "Pemikiran visioner", "Inovasi & ide segar", "Kemampuan memulai hal baru"],
-            "tantangan": ["Sulit menyelesaikan sesuatu", "Mudah terdistraksi", "Terlalu idealis"],
-        },
-        "api": {
-            "label": "API (Fire)", "symbol": "🔥",
-            "desc": "Penuh semangat, karismatik, pemimpin alami, dan energik.",
-            "kekuatan": ["Kepemimpinan natural", "Semangat menular", "Kemampuan motivasi", "Berani mengambil risiko"],
-            "tantangan": ["Mudah terbakar emosi", "Impulsif", "Sulit sabar"],
-        },
-        "tanah": {
-            "label": "TANAH (Earth)", "symbol": "🌍",
-            "desc": "Stabil, dapat diandalkan, praktis, dan berorientasi pada fakta.",
-            "kekuatan": ["Sangat bisa diandalkan", "Konsistensi tinggi", "Praktis & realistis", "Stabilitas emosi"],
-            "tantangan": ["Sulit berubah", "Terlalu konservatif", "Cenderung kaku"],
-        },
-        "logam": {
-            "label": "LOGAM (Metal)", "symbol": "⚡",
-            "desc": "Adaptif, komunikatif, fleksibel, dan pandai bergaul.",
-            "kekuatan": ["Mudah beradaptasi", "Komunikasi excellent", "Network luas", "Fleksibel & kreatif"],
-            "tantangan": ["Kurang fokus", "Mudah bosan", "Tidak konsisten"],
-        },
-        "air": {
-            "label": "AIR (Water)", "symbol": "💧",
-            "desc": "Bijaksana, intuitif, reflektif, dan memiliki empati mendalam.",
-            "kekuatan": ["Kebijaksanaan mendalam", "Intuisi tajam", "Empati tinggi", "Pemikir strategis"],
-            "tantangan": ["Terlalu introspektif", "Sulit membuat keputusan cepat", "Overthinking"],
-        },
+    # Build personality code: i/e/a + K/A/T/L/R
+    p_prefix = {"Introvert": "i", "Extrovert": "e", "Ambivert": "a"}.get(personality, "a")
+    e_prefix = {"kayu": "K", "api": "A", "tanah": "T", "logam": "L", "air": "R"}.get(element, "K")
+    code = p_prefix + e_prefix
+
+    data = PERSONALITY_DATA.get(code) or PERSONALITY_DATA.get(p_prefix + e_prefix.lower())
+
+    if data:
+        ka = data.get("kompilasiAdaptasi", {})
+        return {
+            "code": code,
+            "elementLabel": f"{element.upper()} ({_elem_en(element)})",
+            "elementSymbol": _elem_symbol(element),
+            "elementDescription": data.get("kepribadian", []),
+            "personalityLabel": personality,
+            "kekuatanJatidiri": data.get("kekuatanJatidiri", {}),
+            "karakter": data.get("karakter", []),
+            "ciriKhas": data.get("ciriKhas", []),
+            "dibutuhkanPadaProfesi": data.get("dibutuhkanPadaProfesi", ""),
+            "kompilasiAdaptasi": ka,
+            "strengths": data.get("kekuatanJatidiri", {}).get("kekuatan", []),
+            "areasToImprove": [],
+            "careerRecommendations": [data.get("dibutuhkanPadaProfesi", "")],
+            "summary": f"Kepribadian {personality} dengan elemen dominan {element.upper()} - {data.get('kekuatanJatidiri', {}).get('tipe', '')}",
+        }
+
+    # fallback
+    element_map = {
+        "kayu":  {"label": "Si KREATIF", "desc": "Kreatif, visioner, inovatif"},
+        "api":   {"label": "Si PEMIMPIN", "desc": "Bersemangat, karismatik, pemimpin"},
+        "tanah": {"label": "Si AKTIF", "desc": "Stabil, praktis, dapat diandalkan"},
+        "logam": {"label": "Si ADAPTIF", "desc": "Fleksibel, komunikatif, adaptif"},
+        "air":   {"label": "Si BIJAK", "desc": "Bijaksana, intuitif, empatik"},
     }
-
-    interest_careers = {
-        "analitik": ["Data Scientist", "Financial Analyst", "Business Analyst", "Research Scientist", "Statistician"],
-        "sosial": ["Konselor/Psikolog", "HR Manager", "Social Worker", "Teacher/Trainer", "Community Manager"],
-        "praktis": ["Engineer", "Dokter/Perawat", "Chef/Culinary", "Teknisi", "Arsitek"],
-        "artistik": ["Graphic Designer", "Musisi/Seniman", "Content Creator", "UX/UI Designer", "Fotografer"],
-        "enterprising": ["Entrepreneur", "Sales Manager", "Marketing Director", "Business Development", "CEO/Founder"],
-        "investigatif": ["Peneliti/Scientist", "Programmer/Developer", "Dokter Spesialis", "Detektif/Investigator", "Profesor"],
-    }
-
-    talent_descriptions = {
-        "komunikasi": "kemampuan berbicara dan menyampaikan ide secara efektif",
-        "empati": "kepekaan tinggi terhadap perasaan dan kebutuhan orang lain",
-        "kinestetik": "koordinasi fisik dan kecerdasan gerakan yang unggul",
-        "logika": "kemampuan berpikir sistematis dan memecahkan masalah kompleks",
-        "musikal": "kepekaan terhadap ritme, nada, dan ekspresi musikal",
-        "visual": "kemampuan visualisasi, estetika, dan desain yang kuat",
-    }
-
-    el = element_data.get(element, element_data["air"])
-    careers = interest_careers.get(interest, ["Profesional di bidang yang diminati"])
-    talent_desc = talent_descriptions.get(talent, talent)
-
-    summary = (
-        f"Anda adalah pribadi dengan karakter dominan {el['label']} — {el['desc']} "
-        f"Sebagai seorang {personality}, Anda lebih suka {('bekerja sendiri dan merenung' if personality == 'Introvert' else 'berkolaborasi dan berinteraksi')}. "
-        f"Bakat terkuat Anda adalah {talent_desc}."
-    )
-
+    em = element_map.get(element, {"label": "Si UNIK", "desc": "Pribadi yang unik"})
     return {
-        "elementLabel": el["label"],
-        "elementSymbol": el["symbol"],
-        "elementDescription": el["desc"],
+        "code": code,
+        "elementLabel": f"{element.upper()} ({_elem_en(element)})",
+        "elementSymbol": _elem_symbol(element),
+        "elementDescription": [em["desc"]],
         "personalityLabel": personality,
-        "strengths": el["kekuatan"],
-        "areasToImprove": el["tantangan"],
-        "careerRecommendations": careers,
-        "talentDescription": talent_desc,
-        "summary": summary,
+        "kekuatanJatidiri": {"tipe": em["label"]},
+        "karakter": [],
+        "ciriKhas": [],
+        "dibutuhkanPadaProfesi": "Profesi yang memerlukan keahlian utama Anda",
+        "kompilasiAdaptasi": {},
+        "strengths": [],
+        "areasToImprove": [],
+        "careerRecommendations": [],
+        "summary": f"Kepribadian {personality} dengan elemen dominan {element.upper()}",
     }
+
+
+def _elem_en(e: str) -> str:
+    return {"kayu": "Wood", "api": "Fire", "tanah": "Earth", "logam": "Metal", "air": "Water"}.get(e, e)
+
+def _elem_symbol(e: str) -> str:
+    return {"kayu": "🌿", "api": "🔥", "tanah": "🌍", "logam": "⚡", "air": "💧"}.get(e, "✨")
 
 
 def get_personality_insights(category_analysis: dict, dominant_category: str) -> dict:
