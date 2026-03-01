@@ -34,9 +34,21 @@ async def check_test_access(token_data: dict = Depends(verify_token)):
         has_taken_free = free_test_history is not None
         
         # Check if user has paid access
-        # TODO: Check payment status in user profile or payments collection
         user = await db.users.find_one({"email": user_email}, {"_id": 0})
-        has_paid_access = user.get("hasPaidAccess", False) if user else False
+        has_paid_access = False
+        if user:
+            has_paid_access = (
+                user.get("hasPaidAccess", False) or
+                user.get("paymentStatus") in ["approved", "paid"] or
+                user.get("paidTestStatus") == "completed"
+            )
+            # Also check payment_proofs collection
+            if not has_paid_access:
+                approved_payment = await db.payment_proofs.find_one({
+                    "userEmail": user_email,
+                    "status": {"$in": ["approved", "paid"]}
+                })
+                has_paid_access = approved_payment is not None
         
         if has_taken_free and not has_paid_access:
             return TestAccessResponse(
