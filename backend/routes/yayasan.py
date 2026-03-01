@@ -94,7 +94,7 @@ async def register_yayasan(data: YayasanCreate, request: Request):
         
         # Get default test price from settings
         settings = await db.settings.find_one()
-        default_price = settings.get("paymentAmount", 100000) if settings else 50000
+        default_price = settings.get("paymentAmount", 100000) if settings else 100000
         
         yayasan_doc = {
             "name": data.name,
