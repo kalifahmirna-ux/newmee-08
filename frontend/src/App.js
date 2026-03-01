@@ -1,10 +1,6 @@
 import React from 'react';
 import './App.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-
-// Export API config for other components
-export const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-export const API = `${BACKEND_URL}/api`;
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import VisitorTracker from './components/VisitorTracker';
