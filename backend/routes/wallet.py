@@ -91,94 +91,42 @@ async def create_topup(request: TopUpRequest):
 @router.get("/check-status/{order_id}")
 async def check_payment_status(order_id: str):
     try:
-        auth_string = base64.b64encode(f"{MIDTRANS_SERVER_KEY}:".encode()).decode()
-        
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                f"{MIDTRANS_API_URL}/v2/{order_id}/status",
-                headers={
-                    "Authorization": f"Basic {auth_string}",
-                    "Accept": "application/json"
-                }
-            )
-            result = response.json()
-        
-        transaction_status = result.get("transaction_status", "pending")
-        
-        # Update local transaction if settlement
-        if transaction_status == "settlement" or transaction_status == "capture":
-            transaction = await db.wallet_transactions.find_one({"orderId": order_id})
-            if transaction and transaction.get("status") == "pending":
-                # Update transaction status
-                await db.wallet_transactions.update_one(
-                    {"orderId": order_id},
-                    {"$set": {"status": "success", "updatedAt": datetime.utcnow()}}
-                )
-                
-                # Add balance to wallet
-                await db.wallets.update_one(
-                    {"userId": transaction["userId"]},
-                    {
-                        "$inc": {"balance": transaction["amount"]},
-                        "$set": {"updatedAt": datetime.utcnow()}
-                    },
-                    upsert=True
-                )
-        
+        transaction = await db.wallet_transactions.find_one({"orderId": order_id})
+        if not transaction:
+            raise HTTPException(status_code=404, detail="Transaction not found")
         return {
             "orderId": order_id,
-            "status": transaction_status,
-            "midtransResponse": result
+            "status": transaction.get("status", "pending"),
+            "amount": transaction.get("amount", 0)
         }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# Midtrans webhook/notification handler
+
+# Notification handler (PayDisini callback)
 @router.post("/notification")
 async def handle_notification(request: Request):
     try:
         data = await request.json()
-        
-        order_id = data.get("order_id")
-        transaction_status = data.get("transaction_status")
-        fraud_status = data.get("fraud_status", "accept")
-        
-        # Verify signature
-        server_key = MIDTRANS_SERVER_KEY
-        signature_key = data.get("signature_key")
-        order_id_data = data.get("order_id")
-        status_code = data.get("status_code")
-        gross_amount = data.get("gross_amount")
-        
-        raw_string = f"{order_id_data}{status_code}{gross_amount}{server_key}"
-        expected_signature = hashlib.sha512(raw_string.encode()).hexdigest()
-        
-        # Process based on status
-        if transaction_status == "settlement" or (transaction_status == "capture" and fraud_status == "accept"):
-            transaction = await db.wallet_transactions.find_one({"orderId": order_id})
-            if transaction and transaction.get("status") == "pending":
-                # Update transaction
-                await db.wallet_transactions.update_one(
-                    {"orderId": order_id},
-                    {"$set": {"status": "success", "updatedAt": datetime.utcnow()}}
-                )
-                
-                # Add balance
-                await db.wallets.update_one(
-                    {"userId": transaction["userId"]},
-                    {
-                        "$inc": {"balance": transaction["amount"]},
-                        "$set": {"updatedAt": datetime.utcnow()}
-                    },
-                    upsert=True
-                )
-        
-        elif transaction_status in ["deny", "cancel", "expire"]:
-            await db.wallet_transactions.update_one(
-                {"orderId": order_id},
-                {"$set": {"status": "failed", "updatedAt": datetime.utcnow()}}
-            )
-        
+        order_id = data.get("order_id") or data.get("unique_code")
+        status = data.get("status", "pending")
+
+        if order_id:
+            if status == "Success":
+                transaction = await db.wallet_transactions.find_one({"orderId": order_id})
+                if transaction and transaction.get("status") == "pending":
+                    await db.wallet_transactions.update_one(
+                        {"orderId": order_id},
+                        {"$set": {"status": "success", "updatedAt": datetime.utcnow()}}
+                    )
+                    await db.wallets.update_one(
+                        {"userId": transaction["userId"]},
+                        {"$inc": {"balance": transaction["amount"]}, "$set": {"updatedAt": datetime.utcnow()}},
+                        upsert=True
+                    )
+
         return {"status": "ok"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
