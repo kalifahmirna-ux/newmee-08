@@ -139,6 +139,7 @@ const AppContent = () => {
                   <Route path="/test/result/:testType/:result" element={<PersonalityTestResult />} />
                   <Route path="/test-selection" element={<TestSelection />} />
                   <Route path="/certificate-verify" element={<CertificateVerify />} />
+                  <Route path="/verifikasi-sertifikat" element={<CertificateVerify />} />
                   <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                 </Routes>
                 <Footer />
