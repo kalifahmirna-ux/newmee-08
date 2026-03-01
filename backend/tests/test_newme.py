@@ -79,7 +79,7 @@ class TestAdminAuth:
         if not TestAdminAuth.admin_token:
             pytest.skip("No admin token")
         r = requests.get(
-            f"{BASE_URL}/api/admin/dashboard-stats",
+            f"{BASE_URL}/api/admin/dashboard/stats",
             headers={"Authorization": f"Bearer {TestAdminAuth.admin_token}"}
         )
         print(f"Admin stats: {r.status_code} - {r.text[:200]}")
