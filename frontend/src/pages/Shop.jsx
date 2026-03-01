@@ -22,8 +22,6 @@ const Shop = () => {
 
   useEffect(() => {
     loadProducts();
-    loadMidtransConfig();
-    loadMidtransScript();
   }, []);
 
   const loadProducts = async () => {
@@ -35,22 +33,6 @@ const Shop = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const loadMidtransConfig = async () => {
-    try {
-      const response = await transactionsAPI.getConfig();
-      setMidtransConfig(response.data);
-    } catch (error) {
-      console.error('Failed to load Midtrans config');
-    }
-  };
-
-  const loadMidtransScript = () => {
-    const script = document.createElement('script');
-    script.src = 'https://app.sandbox.midtrans.com/snap/snap.js';
-    script.setAttribute('data-client-key', process.env.REACT_APP_MIDTRANS_CLIENT_KEY || '');
-    document.body.appendChild(script);
   };
 
   const formatPrice = (price) => {
