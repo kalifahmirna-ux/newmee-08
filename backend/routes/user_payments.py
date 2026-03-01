@@ -65,7 +65,7 @@ async def upload_payment_proof(
         if referralCode:
             yayasan = await db.yayasan.find_one({"referralCode": referralCode, "isActive": True})
             if yayasan:
-                final_amount = yayasan.get("customPrice", paymentAmount)
+                final_amount = yayasan.get("referralPrice", paymentAmount)
                 yayasan_info = {"yayasanId": str(yayasan["_id"]), "yayasanName": yayasan.get("name")}
 
         # Create payment record
@@ -136,7 +136,7 @@ async def get_test_price(referralCode: Optional[str] = None):
         if referralCode:
             yayasan = await db.yayasan.find_one({"referralCode": referralCode, "isActive": True})
             if yayasan:
-                final_price = yayasan.get("customPrice", base_price)
+                final_price = yayasan.get("referralPrice", base_price)
                 is_yayasan_price = True
                 yayasan_name = yayasan.get("name")
 
