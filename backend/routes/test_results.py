@@ -150,16 +150,16 @@ def build_insights(element: str, personality: str, interest: str, talent: str, d
     except ImportError:
         PERSONALITY_DATA = {}
 
-    # Build personality code: i/e/a + K/A/T/L/R
     p_prefix = {"Introvert": "i", "Extrovert": "e", "Ambivert": "a"}.get(personality, "a")
     e_prefix = {"kayu": "K", "api": "A", "tanah": "T", "logam": "L", "air": "R"}.get(element, "K")
     code = p_prefix + e_prefix
 
-    data = PERSONALITY_DATA.get(code) or PERSONALITY_DATA.get(p_prefix + e_prefix.lower())
+    # Look up with multiple fallbacks
+    data = (PERSONALITY_DATA.get(code)
+            or PERSONALITY_DATA.get("i" + e_prefix)
+            or PERSONALITY_DATA.get("e" + e_prefix))
 
-    # Ambivert fallback: try iX first, then eX
-    if not data and personality == "Ambivert":
-        data = PERSONALITY_DATA.get("i" + e_prefix) or PERSONALITY_DATA.get("e" + e_prefix)
+    if data:
         ka = data.get("kompilasiAdaptasi", {})
         return {
             "code": code,
@@ -180,23 +180,23 @@ def build_insights(element: str, personality: str, interest: str, talent: str, d
 
     # fallback
     element_map = {
-        "kayu":  {"label": "Si KREATIF", "desc": "Kreatif, visioner, inovatif"},
-        "api":   {"label": "Si PEMIMPIN", "desc": "Bersemangat, karismatik, pemimpin"},
-        "tanah": {"label": "Si AKTIF", "desc": "Stabil, praktis, dapat diandalkan"},
-        "logam": {"label": "Si ADAPTIF", "desc": "Fleksibel, komunikatif, adaptif"},
-        "air":   {"label": "Si BIJAK", "desc": "Bijaksana, intuitif, empatik"},
+        "kayu":  {"label": "Si KREATIF"},
+        "api":   {"label": "Si PEMIMPIN"},
+        "tanah": {"label": "Si AKTIF"},
+        "logam": {"label": "Si ADAPTIF"},
+        "air":   {"label": "Si BIJAK"},
     }
-    em = element_map.get(element, {"label": "Si UNIK", "desc": "Pribadi yang unik"})
+    em = element_map.get(element, {"label": "Si UNIK"})
     return {
         "code": code,
         "elementLabel": f"{element.upper()} ({_elem_en(element)})",
         "elementSymbol": _elem_symbol(element),
-        "elementDescription": [em["desc"]],
+        "elementDescription": [],
         "personalityLabel": personality,
         "kekuatanJatidiri": {"tipe": em["label"]},
         "karakter": [],
         "ciriKhas": [],
-        "dibutuhkanPadaProfesi": "Profesi yang memerlukan keahlian utama Anda",
+        "dibutuhkanPadaProfesi": "",
         "kompilasiAdaptasi": {},
         "strengths": [],
         "areasToImprove": [],
