@@ -210,8 +210,9 @@ export const userPaymentsAPI = {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
   getMyPayments: () => apiClient.get('/user-payments/my-payments'),
-  getTestPrice: () => apiClient.get('/user-payments/test-price'),
+  getTestPrice: (referralCode) => apiClient.get('/user-payments/test-price' + (referralCode ? `?referralCode=${referralCode}` : '')),
   createQRIS: () => apiClient.post('/user-payments/create-qris'),
+  checkQRIS: (uniqueCode) => apiClient.get(`/user-payments/check-qris/${uniqueCode}`),
   checkPayment: (orderId) => apiClient.get(`/user-payments/check-payment/${orderId}`),
 };
 
