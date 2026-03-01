@@ -16,10 +16,8 @@ router = APIRouter(prefix="/api/user-payments", tags=["user-payments"])
 db = get_db()
 logger = logging.getLogger(__name__)
 
-# Upload directory
 UPLOAD_DIR = Path("/app/frontend/public/uploads/payments")
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
 
@@ -27,7 +25,151 @@ def allowed_file(filename: str) -> bool:
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-@router.post("/upload-proof", response_model=dict)
+# ──────────────────────────────────────────────
+#  QRIS — PayDisini (service=17)
+# ──────────────────────────────────────────────
+
+@router.post("/create-qris", response_model=dict)
+async def create_qris_payment(
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Buat QRIS PayDisini untuk pembayaran test premium.
+    Menggunakan service=17, valid_time=300 (5 menit).
+    """
+    try:
+        # Cek apakah ada QRIS pending dalam 10 menit terakhir
+        from bson import ObjectId
+        from datetime import timedelta
+        ten_min_ago = datetime.utcnow() - timedelta(minutes=10)
+        pending = await db.payment_proofs.find_one({
+            "userId": str(current_user["_id"]),
+            "paymentMethod": "QRIS",
+            "status": "pending",
+            "createdAt": {"$gte": ten_min_ago}
+        })
+        if pending:
+            return {
+                "success": True,
+                "already_pending": True,
+                "message": "Ada transaksi QRIS pending. Selesaikan pembayaran sebelumnya.",
+                "data": {
+                    "unique_code": pending.get("uniqueCode"),
+                    "checkout_url": pending.get("checkoutUrl", ""),
+                    "checkout_url_beta": pending.get("checkoutUrlBeta", ""),
+                    "qr_url": pending.get("qrUrl", ""),
+                    "qr_content": pending.get("qrContent", ""),
+                    "amount": pending.get("grossAmount", 0)
+                }
+            }
+
+        # Ambil harga dari settings
+        settings = await db.settings.find_one()
+        amount = int(settings.get("paymentAmount", 100000)) if settings else 100000
+
+        # Cek apakah user menggunakan referral yayasan
+        user_doc = await db.users.find_one({"_id": current_user["_id"]})
+        referral_code = user_doc.get("usedReferralCode") if user_doc else None
+        if referral_code:
+            yayasan = await db.yayasan.find_one({"referralCode": referral_code, "isActive": True})
+            if yayasan:
+                amount = int(yayasan.get("referralPrice", amount))
+
+        # Panggil PayDisini
+        result = paydisini_service.create_qris(
+            amount=amount,
+            note=f"payment qris {amount}"
+        )
+
+        if not result.get("success"):
+            msg = result.get("msg", "Gagal membuat transaksi QRIS. Silakan coba lagi.")
+            raise HTTPException(status_code=502, detail=msg)
+
+        data = result.get("data", {})
+        unique_code = result.get("unique_code", "")
+        checkout_url = data.get("checkout_url", "")
+        checkout_url_beta = data.get("checkout_url_beta", "")
+        qr_content = data.get("qr_content", "")
+        qr_url = data.get("qr_url", "")
+        pay_amount = data.get("amount", amount)
+
+        # Simpan ke database
+        order_id = f"QRIS-{unique_code}"
+        payment_doc = {
+            "userId": str(current_user["_id"]),
+            "userEmail": current_user.get("email"),
+            "userName": current_user.get("fullName", ""),
+            "paymentType": "test",
+            "paymentMethod": "QRIS",
+            "grossAmount": pay_amount,
+            "orderId": order_id,
+            "uniqueCode": unique_code,
+            "checkoutUrl": checkout_url,
+            "checkoutUrlBeta": checkout_url_beta,
+            "qrUrl": qr_url,
+            "qrContent": qr_content,
+            "status": "pending",
+            "referralCode": referral_code,
+            "createdAt": datetime.utcnow()
+        }
+        await db.payment_proofs.insert_one(payment_doc)
+
+        return {
+            "success": True,
+            "message": result.get("msg", "QR Code berhasil dibuat"),
+            "data": {
+                "unique_code": unique_code,
+                "checkout_url": checkout_url,
+                "checkout_url_beta": checkout_url_beta,
+                "qr_content": qr_content,
+                "qr_url": qr_url,
+                "amount": pay_amount
+            }
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Create QRIS error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+@router.get("/check-qris/{unique_code}", response_model=dict)
+async def check_qris_status(
+    unique_code: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Cek status pembayaran QRIS ke PayDisini"""
+    try:
+        result = paydisini_service.check_payment_status(unique_code)
+        logger.info(f"QRIS status check: {unique_code} → {result}")
+
+        if result.get("success") and result.get("data", {}).get("status") == "Success":
+            # Update status di database
+            await db.payment_proofs.update_one(
+                {"uniqueCode": unique_code},
+                {"$set": {"status": "approved", "updatedAt": datetime.utcnow()}}
+            )
+            payment = await db.payment_proofs.find_one({"uniqueCode": unique_code})
+            if payment:
+                await db.users.update_one(
+                    {"_id": ObjectId(payment["userId"])},
+                    {"$set": {"paymentStatus": "approved", "hasPaidAccess": True, "paymentDate": datetime.utcnow()}}
+                )
+                if payment.get("referralCode"):
+                    await credit_referral_bonus(payment["referralCode"], payment["userId"])
+
+            return {"success": True, "status": "Success", "paid": True}
+
+        return {
+            "success": result.get("success", False),
+            "status": result.get("data", {}).get("status", "Pending"),
+            "paid": False
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
 async def upload_payment_proof(
     paymentType: str = Form(...),
     paymentMethod: str = Form("bank"),
