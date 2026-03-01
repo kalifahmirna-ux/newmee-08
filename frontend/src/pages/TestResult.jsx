@@ -51,7 +51,8 @@ function ElementBar({ name, score, maxScore }) {
 
 // ── Main Component ───────────────────────────────────────────
 export default function TestResult() {
-  const { id } = useParams();
+  const { resultId, id: idParam } = useParams();
+  const id = resultId || idParam;
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
