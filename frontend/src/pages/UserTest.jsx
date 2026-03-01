@@ -571,20 +571,21 @@ const UserTest = () => {
             {currentQ?.options?.map((option, index) => (
               <button
                 key={index}
-                onClick={() => handleAnswer(currentQ._id, option.value)}
+                onClick={() => handleAnswer(currentQ._id, index)}
                 className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
-                  currentAnswer === option.value
+                  currentAnswer === index
                     ? 'border-yellow-400 bg-yellow-400/10 text-white'
                     : 'border-gray-600 bg-[#1a1a1a] text-gray-300 hover:border-yellow-400/50'
                 }`}
+                data-testid={`option-${index}`}
               >
                 <div className="flex items-center gap-3">
-                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                    currentAnswer === option.value
+                  <div className={`w-6 h-6 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${
+                    currentAnswer === index
                       ? 'border-yellow-400 bg-yellow-400'
                       : 'border-gray-500'
                   }`}>
-                    {currentAnswer === option.value && (
+                    {currentAnswer === index && (
                       <CheckCircle className="w-4 h-4 text-[#1a1a1a]" />
                     )}
                   </div>
