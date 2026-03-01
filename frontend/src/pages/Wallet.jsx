@@ -20,8 +20,6 @@ import { useToast } from '../hooks/use-toast';
 import { authAPI } from '../services/api';
 import axios from 'axios';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-
 // Helper: safely extract error message from API error
 const getErrorMsg = (error, fallback = 'Terjadi kesalahan') => {
   const detail = error?.response?.data?.detail;
