@@ -972,72 +972,29 @@ const UserDashboard = () => {
                       </div>
                     )}
 
-                    {/* QRIS Info */}
-                    {paymentMethod === 'qris' && (
-                      <div className="bg-[#1a1a1a] rounded-lg p-4">
-                        <p className="text-yellow-400 font-semibold mb-3 text-center">Pembayaran QRIS</p>
-                        
-                        {!qrisData ? (
-                          <div className="text-center space-y-4">
-                            <p className="text-gray-400 text-sm">
-                              Klik tombol di bawah untuk generate QRIS code
-                            </p>
-                            <Button
-                              onClick={handleCreateQRIS}
-                              disabled={loadingQris}
-                              className="w-full bg-yellow-400 text-black hover:bg-yellow-500"
-                            >
-                              {loadingQris ? (
-                                <span className="flex items-center justify-center">
-                                  <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin mr-2"></div>
-                                  Membuat QRIS...
-                                </span>
-                              ) : (
-                                'Generate QRIS Code'
-                              )}
-                            </Button>
+                    {/* E-Wallet / QRIS Info */}
+                    {paymentMethod === 'ewallet' && (
+                      <div className="bg-[#1a1a1a] rounded-lg p-4 space-y-3">
+                        <p className="text-yellow-400 font-semibold">Pembayaran E-Wallet / QRIS</p>
+                        <p className="text-gray-400 text-sm">
+                          Lakukan pembayaran via E-Wallet (GoPay, OVO, DANA, ShopeePay) atau QRIS ke:
+                        </p>
+                        <div>
+                          <p className="text-gray-400 text-sm">Nama Merchant</p>
+                          <p className="text-white font-semibold">{settings?.bankAccountName || 'NEWME CLASS'}</p>
+                        </div>
+                        {settings?.paymentInstructions && (
+                          <div className="mt-3 pt-3 border-t border-gray-700">
+                            <p className="text-gray-400 text-sm whitespace-pre-line">{settings.paymentInstructions}</p>
                           </div>
-                        ) : (
-                          <div className="space-y-4">
-                            {/* QRIS Image */}
-                            <div className="text-center">
-                              <p className="text-white text-lg font-semibold mb-2">
-                                Scan QRIS untuk bayar Rp {qrisData.grossAmount?.toLocaleString('id-ID')}
-                              </p>
-                              <div className="bg-white p-4 rounded-lg inline-block">
-                                <img 
-                                  src={qrisData.qrisUrl} 
-                                  alt="QRIS Code" 
-                                  className="w-[250px] h-[250px] mx-auto"
-                                />
-                              </div>
-                              <p className="text-gray-400 text-sm mt-3">
-                                Scan kode QR di atas menggunakan aplikasi e-wallet atau m-banking
-                              </p>
-                              <p className="text-yellow-400 text-xs mt-1">
-                                Merchant: {qrisData.merchant || 'BTBTBT57'}
-                              </p>
-                            </div>
-                            
-                            {/* Instructions */}
-                            {qrisData.instructions && (
-                              <div className="bg-[#2a2a2a] rounded-lg p-4 text-left">
-                                <p className="text-yellow-400 font-semibold mb-2">Instruksi Pembayaran:</p>
-                                <ul className="text-gray-300 text-sm space-y-1">
-                                  {qrisData.instructions.map((inst, idx) => (
-                                    <li key={idx}>{inst}</li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-                            
-                            <div className="bg-[#2a2a2a] rounded-lg p-3 space-y-2">
-                              <div className="flex justify-between text-sm">
-                                <span className="text-gray-400">Order ID:</span>
-                                <span className="text-white font-mono text-xs">{qrisData.orderId}</span>
-                              </div>
-                              <div className="flex justify-between text-sm">
-                                <span className="text-gray-400">Amount:</span>
+                        )}
+                        <div className="bg-yellow-400/10 border border-yellow-400/30 rounded-lg p-3">
+                          <p className="text-yellow-400 text-xs">
+                            Setelah transfer, upload screenshot/foto bukti pembayaran di bawah
+                          </p>
+                        </div>
+                      </div>
+                    )}
                                 <span className="text-yellow-400 font-semibold">{formatPrice(qrisData.grossAmount)}</span>
                               </div>
                             </div>
