@@ -186,7 +186,7 @@ const UserDashboard = () => {
       const formData = new FormData();
       formData.append('file', proofFile);
       formData.append('paymentType', 'test');
-      formData.append('paymentMethod', paymentMethod === 'bank' ? 'Transfer Bank' : 'E-Wallet / QRIS');
+      formData.append('paymentMethod', paymentMethod === 'bank' ? 'Transfer Bank' : 'QRIS PayDisini');
       formData.append('paymentAmount', settings?.paymentAmount || 100000);
 
       await userPaymentsAPI.uploadProof(formData);
