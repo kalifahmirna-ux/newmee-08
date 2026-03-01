@@ -32,7 +32,8 @@ class TestAuth:
             "userType": "individual",
             "referralSource": "google",
             "province": "Jawa Barat",
-            "city": "Bandung"
+            "city": "Bandung",
+            "district": "Coblong"
         }
         r = requests.post(f"{BASE_URL}/api/auth/register", json=payload)
         print(f"Register: {r.status_code} - {r.text[:200]}")
