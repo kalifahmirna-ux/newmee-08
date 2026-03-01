@@ -157,7 +157,9 @@ def build_insights(element: str, personality: str, interest: str, talent: str, d
 
     data = PERSONALITY_DATA.get(code) or PERSONALITY_DATA.get(p_prefix + e_prefix.lower())
 
-    if data:
+    # Ambivert fallback: try iX first, then eX
+    if not data and personality == "Ambivert":
+        data = PERSONALITY_DATA.get("i" + e_prefix) or PERSONALITY_DATA.get("e" + e_prefix)
         ka = data.get("kompilasiAdaptasi", {})
         return {
             "code": code,
