@@ -107,8 +107,6 @@ const ImageUploader = ({ value, onChange, placeholder = 'Upload gambar' }) => {
   );
 };
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-
 const WebsiteContent = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('slides');
