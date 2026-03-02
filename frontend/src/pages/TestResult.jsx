@@ -376,12 +376,6 @@ export default function TestResult() {
                 ))}
               </div>
             </section>
-                      <strong style={{ color: ELEM_COLORS[name] }}>{name.toUpperCase()}</strong>{' '}
-                      <span className="text-gray-600">{pct(score, maxElem)}%</span>
-                    </p>
-                  ))}
-              </div>
-            </section>
 
             {/* Ciri Khas */}
             {ciriKhas.length > 0 && (
