@@ -534,8 +534,12 @@ const WebsiteContent = () => {
                   </div>
                 </div>
                 <div>
-                  <Label className="text-white">URL Foto</Label>
-                  <Input value={editingTestimonial.imageUrl} onChange={e => setEditingTestimonial({...editingTestimonial, imageUrl: e.target.value})} className="bg-[#1a1a1a] border-yellow-400/30 text-white" />
+                  <Label className="text-white">Foto</Label>
+                  <ImageUploader 
+                    value={editingTestimonial.imageUrl} 
+                    onChange={(url) => setEditingTestimonial({...editingTestimonial, imageUrl: url})} 
+                    placeholder="Upload foto"
+                  />
                 </div>
                 <div>
                   <Label className="text-white">Testimonial</Label>
