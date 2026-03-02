@@ -388,12 +388,6 @@ const WebsiteContent = () => {
                     <Input value={editingSlide.ctaLink} onChange={e => setEditingSlide({...editingSlide, ctaLink: e.target.value})} className="bg-[#1a1a1a] border-yellow-400/30 text-white" />
                   </div>
                 </div>
-                {editingSlide.imageUrl && (
-                  <div className="mt-2">
-                    <Label className="text-white mb-2 block">Preview</Label>
-                    <img src={editingSlide.imageUrl} alt="Preview" className="w-32 h-32 object-cover rounded-full border-2 border-yellow-400" />
-                  </div>
-                )}
                 <div className="flex gap-2">
                   <Button onClick={() => saveSlide(editingSlide)} className="bg-green-600 hover:bg-green-700">
                     <Save className="w-4 h-4 mr-2" /> Simpan
