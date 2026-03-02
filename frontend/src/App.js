@@ -45,6 +45,7 @@ import AdminUsers from './pages/admin/AdminUsers';
 import WebsiteContent from './pages/admin/WebsiteContent';
 import PremiumResults from './pages/admin/PremiumResults';
 import AdminYayasan from './pages/admin/AdminYayasan';
+import AdminWithdrawals from './pages/admin/AdminWithdrawals';
 import YayasanDashboard from './pages/yayasan/YayasanDashboard';
 import YayasanLogin from './pages/yayasan/YayasanLogin';
 import YayasanRegister from './pages/yayasan/YayasanRegister';
@@ -93,6 +94,7 @@ const AppContent = () => {
           <Route path="website-content" element={<WebsiteContent />} />
           <Route path="premium-results" element={<PremiumResults />} />
           <Route path="yayasan" element={<AdminYayasan />} />
+          <Route path="withdrawals" element={<AdminWithdrawals />} />
         </Route>
         
         {/* Yayasan routes */}
