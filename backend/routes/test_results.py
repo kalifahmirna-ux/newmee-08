@@ -80,12 +80,21 @@ async def generate_test_analysis(answers: dict, test_type: str) -> dict:
             if not question:
                 continue
             options = question.get("options", [])
-            # support both index-based and text-based answer
+            
+            # Convert to int if string
+            if isinstance(option_index, str):
+                try:
+                    option_index = int(option_index)
+                except ValueError:
+                    pass
+            
+            # Get option by index
             if isinstance(option_index, int) and 0 <= option_index < len(options):
                 option = options[option_index]
             else:
                 # try match by text fallback
                 option = next((o for o in options if o.get("text") == option_index), None)
+            
             if not option:
                 continue
 
@@ -93,7 +102,8 @@ async def generate_test_analysis(answers: dict, test_type: str) -> dict:
             weight = float(question.get("weight", 1.0))
             for dim, val in scores.items():
                 dims[dim] = dims.get(dim, 0) + (val * weight)
-        except Exception:
+        except Exception as e:
+            print(f"Error processing answer {question_id}: {e}")
             continue
 
     # ── Dominant element (5 Elemen) ──
