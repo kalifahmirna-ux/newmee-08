@@ -100,7 +100,29 @@ export default function TestResult() {
   const elem = (analysis.dominantElement || 'kayu').toLowerCase();
   const elemColor = ELEM_COLORS[elem] || '#FFC107';
   const elemScores = analysis.elementScores || {};
-  const maxElem = Math.max(...Object.values(elemScores), 1);
+  
+  // Calculate percentages (total = 100%)
+  const totalScore = Object.values(elemScores).reduce((sum, val) => sum + val, 0) || 1;
+  const elemPercentages = {};
+  Object.entries(elemScores).forEach(([name, score]) => {
+    elemPercentages[name] = Math.round((score / totalScore) * 100);
+  });
+  
+  // Adjust to ensure total is exactly 100%
+  const percentageSum = Object.values(elemPercentages).reduce((sum, val) => sum + val, 0);
+  if (percentageSum !== 100 && Object.keys(elemPercentages).length > 0) {
+    // Add/subtract difference to highest element
+    const sortedElems = Object.entries(elemPercentages).sort(([,a], [,b]) => b - a);
+    if (sortedElems.length > 0) {
+      elemPercentages[sortedElems[0][0]] += (100 - percentageSum);
+    }
+  }
+  
+  // Get top 3 elements
+  const top3Elements = Object.entries(elemPercentages)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 3);
+  
   const ka = insights.kompilasiAdaptasi || {};
   const karakter = insights.karakter || [];
   const kj = insights.kekuatanJatidiri || {};
