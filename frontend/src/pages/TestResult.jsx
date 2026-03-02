@@ -398,14 +398,36 @@ export default function TestResult() {
 
       {/* ── Pesan untuk Free Test ── */}
       {result.testType === 'free' && (
-        <div className="max-w-4xl mx-auto mt-4 bg-yellow-50 border border-yellow-400 rounded-xl p-4 print:hidden">
-          <p className="text-yellow-800 font-semibold text-sm text-center">
-            Ini adalah hasil Test Gratis. Untuk analisis lengkap, kompilasi adaptasi penuh, dan sertifikat resmi — upgrade ke <strong>Test Premium</strong>!
-          </p>
-          <div className="text-center mt-2">
-            <Link to="/test" className="inline-block px-6 py-2 bg-yellow-500 text-white rounded-lg font-bold hover:bg-yellow-600 transition text-sm">
-              Mulai Test Premium
+        <div className="max-w-4xl mx-auto mt-4 bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-400 rounded-xl p-6 print:hidden shadow-lg">
+          <div className="text-center space-y-3">
+            <div className="inline-flex items-center gap-2 bg-yellow-400 text-black px-4 py-1 rounded-full text-sm font-bold">
+              <span className="animate-pulse">🔥</span> HASIL TEST GRATIS
+            </div>
+            <h3 className="text-xl font-black text-gray-900">
+              Penasaran dengan Analisis Lengkap Anda?
+            </h3>
+            <p className="text-gray-700 text-sm max-w-lg mx-auto">
+              Hasil di atas hanya <strong>30%</strong> dari total analisis kepribadian Anda. 
+              Upgrade ke <strong>Test Premium</strong> untuk mendapatkan:
+            </p>
+            <ul className="text-left max-w-md mx-auto text-sm text-gray-600 space-y-1">
+              <li className="flex items-center gap-2">
+                <span className="text-green-500">✓</span> Analisis karakter positif & negatif lengkap
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-green-500">✓</span> Kompilasi Adaptasi untuk pengembangan diri
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-green-500">✓</span> Rekomendasi karir berdasarkan kepribadian
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-green-500">✓</span> Sertifikat resmi yang bisa di-download
+              </li>
+            </ul>
+            <Link to="/dashboard" className="inline-block px-8 py-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-xl font-bold hover:shadow-lg hover:scale-105 transition-all text-sm mt-2">
+              UPGRADE KE TEST PREMIUM →
             </Link>
+            <p className="text-xs text-gray-500">Hanya Rp 100.000 untuk analisis seumur hidup</p>
           </div>
         </div>
       )}
