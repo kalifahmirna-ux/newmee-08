@@ -325,18 +325,24 @@ export default function TestResult() {
               </section>
             )}
 
-            {/* Element Scores */}
+            {/* Element Scores - Top 3 Only with Percentage (Total = 100%) */}
             <section>
               <h3 className="font-black text-sm text-gray-900 border-b pb-1 mb-2" style={{ borderColor: '#d4af37' }}>
-                Skor 5 Elemen :
+                Skor 5 Elemen (Top 3) :
               </h3>
-              <div className="space-y-1.5">
-                {Object.entries(elemScores)
-                  .sort(([, a], [, b]) => b - a)
-                  .map(([name, score]) => (
-                    <ElementBar key={name} name={name} score={score} maxScore={maxElem} />
-                  ))}
+              <div className="space-y-2">
+                {top3Elements.map(([name, percentage], index) => (
+                  <div key={name} className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-yellow-400 text-black text-xs font-bold flex items-center justify-center">
+                      {index + 1}
+                    </span>
+                    <ElementBar name={name} percentage={percentage} />
+                  </div>
+                ))}
               </div>
+              <p className="text-xs text-gray-500 mt-2 italic">
+                *Total 5 elemen = 100%
+              </p>
             </section>
           </div>
 
