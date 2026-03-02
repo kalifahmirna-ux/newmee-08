@@ -86,6 +86,52 @@ async def upload_single_file(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
+
+@router.post("/image", response_model=dict)
+async def upload_image(file: UploadFile = File(...)):
+    """
+    Simple image upload endpoint - returns URL directly
+    """
+    try:
+        file_extension = validate_file(file)
+        
+        upload_dir = get_upload_dir("images")
+        unique_filename = f"{uuid.uuid4()}.{file_extension}"
+        file_path = upload_dir / unique_filename
+        
+        contents = await file.read()
+        
+        # Check file size
+        if len(contents) > MAX_FILE_SIZE:
+            raise HTTPException(status_code=400, detail="Ukuran file maksimal 10MB")
+        
+        with open(file_path, 'wb') as f:
+            f.write(contents)
+        
+        file_url = f"/uploads/images/{unique_filename}"
+        
+        # Log upload to database
+        await db.uploads.insert_one({
+            "filename": unique_filename,
+            "originalName": file.filename,
+            "url": file_url,
+            "category": "images",
+            "size": len(contents),
+            "mimeType": file.content_type,
+            "uploadedAt": datetime.utcnow()
+        })
+        
+        return {
+            "success": True,
+            "url": file_url,
+            "filename": unique_filename
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
 @router.post("/multiple", response_model=dict)
 async def upload_multiple_files(
     files: List[UploadFile] = File(...),
