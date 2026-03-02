@@ -7,14 +7,15 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const SITE_URL = window.location.origin;
 
 // ── helper ──────────────────────────────────────────────────
-const pct = (val, max) => max > 0 ? Math.round((val / max) * 100) : 0;
+const pct = (val, total) => total > 0 ? Math.round((val / total) * 100) : 0;
 
 const ELEM_COLORS = {
   kayu: '#4CAF50', api: '#FF5722', tanah: '#FFC107',
   logam: '#9E9E9E', air: '#2196F3',
 };
-const ELEM_EN = {
-  kayu: 'Wood', api: 'Fire', tanah: 'Earth', logam: 'Metal', air: 'Water',
+const ELEM_LABELS = {
+  kayu: 'Kayu (Wood)', api: 'Api (Fire)', tanah: 'Tanah (Earth)', 
+  logam: 'Logam (Metal)', air: 'Air (Water)',
 };
 
 // ── PersonalityCode badge ────────────────────────────────────
@@ -36,17 +37,22 @@ function CodeBadge({ code }) {
   );
 }
 
-// ── Element Score Bar ────────────────────────────────────────
-function ElementBar({ name, score, maxScore }) {
-  const p = pct(score, maxScore);
+// ── Element Score Bar (shows percentage of total) ────────────
+function ElementBar({ name, percentage, showPercentage = true }) {
   const color = ELEM_COLORS[name] || '#888';
+  const label = ELEM_LABELS[name] || name;
   return (
     <div className="flex items-center gap-2 text-xs">
-      <span className="w-14 text-right text-gray-700 font-semibold capitalize">{name}</span>
-      <div className="flex-1 bg-gray-200 rounded-full h-2.5">
-        <div className="h-2.5 rounded-full" style={{ width: `${p}%`, backgroundColor: color }} />
+      <span className="w-20 text-right text-gray-700 font-semibold">{label.split(' ')[0]}</span>
+      <div className="flex-1 bg-gray-200 rounded-full h-3">
+        <div 
+          className="h-3 rounded-full transition-all duration-500" 
+          style={{ width: `${percentage}%`, backgroundColor: color }} 
+        />
       </div>
-      <span className="w-8 text-gray-600 font-bold">{p}%</span>
+      {showPercentage && (
+        <span className="w-10 text-gray-600 font-bold">{percentage}%</span>
+      )}
     </div>
   );
 }
