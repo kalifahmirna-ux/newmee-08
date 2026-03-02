@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
+import { Share2, MessageCircle, Facebook, Instagram, Download } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+const SITE_URL = window.location.origin;
 
 // ── helper ──────────────────────────────────────────────────
 const pct = (val, max) => max > 0 ? Math.round((val / max) * 100) : 0;
@@ -103,21 +105,57 @@ export default function TestResult() {
   return (
     <div className="min-h-screen bg-gray-100 py-6 px-4">
       {/* Action bar */}
-      <div className="max-w-4xl mx-auto mb-4 flex gap-3 justify-between items-center print:hidden">
+      <div className="max-w-4xl mx-auto mb-4 flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center print:hidden">
         <Link to="/dashboard" className="text-yellow-600 underline text-sm">← Dashboard</Link>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button
             onClick={() => window.print()}
-            className="px-4 py-2 bg-yellow-500 text-white rounded-lg text-sm font-semibold hover:bg-yellow-600 transition"
+            className="px-4 py-2 bg-yellow-500 text-white rounded-lg text-sm font-semibold hover:bg-yellow-600 transition flex items-center gap-2"
+            data-testid="btn-print"
           >
-            Cetak / Simpan PDF
+            <Download className="w-4 h-4" />
+            Cetak / PDF
           </button>
-          <Link
-            to={`/certificate/${id}`}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 transition"
+          
+          {/* Share Buttons */}
+          <button
+            onClick={() => {
+              const text = `Hasil Analisa Kepribadian NEWME saya: ${insights.personalityLabel || analysis.personalityType || 'Unik'}! Kode: ${code}. Temukan potensimu juga di ${SITE_URL}`;
+              const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+              window.open(waUrl, '_blank');
+            }}
+            className="px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-semibold hover:bg-green-600 transition flex items-center gap-2"
+            data-testid="btn-share-wa"
           >
-            Download Sertifikat
-          </Link>
+            <MessageCircle className="w-4 h-4" />
+            WhatsApp
+          </button>
+          
+          <button
+            onClick={() => {
+              const text = `Hasil Analisa Kepribadian NEWME saya: ${insights.personalityLabel || analysis.personalityType || 'Unik'}!`;
+              const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${SITE_URL}/test-result/${id}`)}&quote=${encodeURIComponent(text)}`;
+              window.open(fbUrl, '_blank', 'width=600,height=400');
+            }}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition flex items-center gap-2"
+            data-testid="btn-share-fb"
+          >
+            <Facebook className="w-4 h-4" />
+            Facebook
+          </button>
+          
+          <button
+            onClick={() => {
+              const text = `Hasil Analisa Kepribadian NEWME saya: ${insights.personalityLabel || analysis.personalityType || 'Unik'}! Kode: ${code}. Temukan potensimu juga di ${SITE_URL}`;
+              navigator.clipboard.writeText(text);
+              alert('Teks berhasil disalin! Paste ke Instagram Story atau feed Anda.');
+            }}
+            className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg text-sm font-semibold hover:opacity-90 transition flex items-center gap-2"
+            data-testid="btn-share-ig"
+          >
+            <Instagram className="w-4 h-4" />
+            Instagram
+          </button>
         </div>
       </div>
 
