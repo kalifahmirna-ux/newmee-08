@@ -453,8 +453,12 @@ const WebsiteContent = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-white">URL Gambar</Label>
-                    <Input value={editingProduct.imageUrl} onChange={e => setEditingProduct({...editingProduct, imageUrl: e.target.value})} className="bg-[#1a1a1a] border-yellow-400/30 text-white" />
+                    <Label className="text-white">Gambar Produk</Label>
+                    <ImageUploader 
+                      value={editingProduct.imageUrl} 
+                      onChange={(url) => setEditingProduct({...editingProduct, imageUrl: url})} 
+                      placeholder="Upload gambar produk"
+                    />
                   </div>
                   <div>
                     <Label className="text-white">Link</Label>
