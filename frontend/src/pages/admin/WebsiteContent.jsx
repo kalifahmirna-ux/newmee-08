@@ -370,8 +370,12 @@ const WebsiteContent = () => {
                     <Input value={editingSlide.badge} onChange={e => setEditingSlide({...editingSlide, badge: e.target.value})} className="bg-[#1a1a1a] border-yellow-400/30 text-white" />
                   </div>
                   <div>
-                    <Label className="text-white">URL Gambar</Label>
-                    <Input value={editingSlide.imageUrl} onChange={e => setEditingSlide({...editingSlide, imageUrl: e.target.value})} className="bg-[#1a1a1a] border-yellow-400/30 text-white" placeholder="https://..." />
+                    <Label className="text-white">Gambar</Label>
+                    <ImageUploader 
+                      value={editingSlide.imageUrl} 
+                      onChange={(url) => setEditingSlide({...editingSlide, imageUrl: url})} 
+                      placeholder="Upload gambar slide"
+                    />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
