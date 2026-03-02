@@ -181,10 +181,12 @@ def build_insights(element: str, personality: str, interest: str, talent: str, d
             "karakter": data.get("karakter", []),
             "ciriKhas": data.get("ciriKhas", []),
             "dibutuhkanPadaProfesi": data.get("dibutuhkanPadaProfesi", ""),
+            "rekomendasiKarir": data.get("rekomendasiKarir", ""),
+            "penjelasanSederhana": data.get("penjelasanSederhana", ""),
             "kompilasiAdaptasi": ka,
             "strengths": data.get("kekuatanJatidiri", {}).get("kekuatan", []),
             "areasToImprove": [],
-            "careerRecommendations": [data.get("dibutuhkanPadaProfesi", "")],
+            "careerRecommendations": [data.get("rekomendasiKarir", data.get("dibutuhkanPadaProfesi", ""))],
             "summary": f"Kepribadian {personality} dengan elemen dominan {element.upper()} - {data.get('kekuatanJatidiri', {}).get('tipe', '')}",
         }
 
