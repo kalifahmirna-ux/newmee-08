@@ -358,36 +358,63 @@ export default function TestResult() {
               </p>
             </section>
 
-            {/* Simbol Jatidiri */}
-            <section>
+            {/* Simbol Jatidiri - BLUR for free */}
+            <section className="relative">
               <h3 className="font-black text-xs text-gray-900 mb-1">Simbol Jatidiri :</h3>
-              <div className="text-xs space-y-1">
-                {top3Elements.map(([name, percentage], i) => (
-                  <p key={name}>
-                    <span className="text-gray-500">Dominan {['I', 'II', 'III'][i]} :</span>{' '}
-                    <span className="font-bold capitalize" style={{ color: ELEM_COLORS[name] }}>
-                      {ELEM_LABELS[name]?.split(' ')[0] || name} ({percentage}%)
-                    </span>
-                  </p>
-                ))}
-              </div>
+              {result.testType === 'free' ? (
+                <div className="relative">
+                  <div className="text-xs space-y-1 blur-sm select-none">
+                    <p><span className="text-gray-500">Dominan I :</span> <span className="font-bold">***</span></p>
+                    <p><span className="text-gray-500">Dominan II :</span> <span className="font-bold">***</span></p>
+                    <p><span className="text-gray-500">Dominan III :</span> <span className="font-bold">***</span></p>
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="bg-yellow-400 text-black text-xs font-bold px-2 py-1 rounded">PREMIUM</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-xs space-y-1">
+                  {top3Elements.map(([name, percentage], i) => (
+                    <p key={name}>
+                      <span className="text-gray-500">Dominan {['I', 'II', 'III'][i]} :</span>{' '}
+                      <span className="font-bold capitalize" style={{ color: ELEM_COLORS[name] }}>
+                        {ELEM_LABELS[name]?.split(' ')[0] || name} ({percentage}%)
+                      </span>
+                    </p>
+                  ))}
+                </div>
+              )}
             </section>
 
-            {/* Ciri Khas */}
-            {ciriKhas.length > 0 && (
-              <section>
-                <h3 className="font-black text-xs text-gray-900 mb-1">Ciri Khas :</h3>
-                <p className="text-xs text-gray-700">{ciriKhas.join(' - ')}</p>
-              </section>
-            )}
+            {/* Ciri Khas - BLUR for free */}
+            <section className="relative">
+              <h3 className="font-black text-xs text-gray-900 mb-1">Ciri Khas :</h3>
+              {result.testType === 'free' ? (
+                <div className="relative">
+                  <p className="text-xs text-gray-700 blur-sm select-none">Menarik - Tampil Beda - Charming</p>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="bg-yellow-400 text-black text-xs font-bold px-2 py-1 rounded">PREMIUM</span>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-xs text-gray-700">{ciriKhas.length > 0 ? ciriKhas.join(' - ') : '-'}</p>
+              )}
+            </section>
 
-            {/* Dibutuhkan Profesi */}
-            {insights.dibutuhkanPadaProfesi && (
-              <section>
-                <h3 className="font-black text-xs text-gray-900 mb-1">Dibutuhkan pada profesi :</h3>
-                <p className="text-xs text-gray-700 italic">{insights.dibutuhkanPadaProfesi}</p>
-              </section>
-            )}
+            {/* Dibutuhkan Profesi - BLUR for free */}
+            <section className="relative">
+              <h3 className="font-black text-xs text-gray-900 mb-1">Rekomendasi Karir :</h3>
+              {result.testType === 'free' ? (
+                <div className="relative">
+                  <p className="text-xs text-gray-700 italic blur-sm select-none">Pilot, Guru, Dokter, Pengusaha...</p>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="bg-yellow-400 text-black text-xs font-bold px-2 py-1 rounded">PREMIUM</span>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-xs text-gray-700 italic">{insights.rekomendasiKarir || insights.dibutuhkanPadaProfesi || '-'}</p>
+              )}
+            </section>
 
             {/* Test type badge */}
             <div className="mt-auto">
@@ -396,7 +423,7 @@ export default function TestResult() {
                   ? 'bg-yellow-100 text-yellow-700 border border-yellow-400'
                   : 'bg-green-100 text-green-700 border border-green-400'
               }`}>
-                {result.testType === 'paid' ? 'Test Premium' : 'Test Gratis'}
+                {result.testType === 'paid' ? 'NEWME Premium' : 'NEWME TEST'}
               </span>
             </div>
           </div>
