@@ -245,7 +245,11 @@ PERSONALITY_DATA = {
             "Fisik sensitif", "Bicara menyentuh hati"
         ],
         
-        "dibutuhkanPadaProfesi": "Yang memerlukan EMPATI & KEDALAMAN"
+        "dibutuhkanPadaProfesi": "Yang memerlukan EMPATI & KEDALAMAN",
+        
+        "penjelasanSederhana": "Anda adalah orang yang sangat peka dan penuh empati. Anda bisa merasakan apa yang orang lain rasakan dan sangat baik dalam memberikan dukungan emosional.",
+        
+        "rekomendasiKarir": "Psikolog, Konselor, Terapis, Perawat, Bidan, Guru TK/SD, Pekerja Sosial, HR Manager, Customer Service, Rohaniwan, Motivator, Life Coach"
     },
     
     "iAi": {
