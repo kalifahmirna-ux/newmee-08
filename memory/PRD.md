@@ -1,166 +1,97 @@
 # NEWME CLASS - Platform Tes Bakat & Potensi
 
 ## Problem Statement
-Install repository https://github.com/dwipuspaanggita-sketch/newme07 ke environment lokal dengan fitur-fitur berikut:
-- Payment manual upload & admin approval
-- Free test (1x only)
-- Premium test (after payment approval)
-- Show premium results in user dashboard and admin dashboard
-- Admin dashboard real-time analytics
-- All image uploads (no URL input)
-- Test flow & validation
-- Referral system
-- Custom pricing yayasan (only via yayasan referral link)
-- Yayasan dashboard view
-- Delete all Midtrans integration
-- Replace with PayDisini production (API ID: 3463, API Key: 2f5f4ce34bcecba908f1038e65cb4624)
-- Language: Bahasa Indonesia
+Install repository https://github.com/dwipuspaanggita-sketch/newme07 dengan fitur lengkap:
+- Payment manual upload & admin approval  
+- Free test (1x only) dengan teaser ke premium
+- Premium test (20 soal) dengan hasil analisis nyata berdasarkan jawaban
+- Yayasan referral system dengan komisi dan withdrawal
+- Admin dashboard dengan content management dan file upload
 
 ## Architecture
-
-### Backend (FastAPI + MongoDB)
-- `/app/backend/server.py` - Main FastAPI app
-- `/app/backend/routes/` - All API routes
-- `/app/backend/services/paydisini.py` - PayDisini integration service
-- `/app/backend/certificate_generator.py` - Certificate PDF generator
-- `/app/backend/personality_data.py` - 5-element personality data
-
-### Frontend (React + TailwindCSS)
-- `/app/frontend/src/App.js` - Route configuration
-- `/app/frontend/src/pages/` - All pages
-- `/app/frontend/src/pages/admin/` - Admin dashboard pages
-- `/app/frontend/src/pages/yayasan/` - Yayasan dashboard pages
-- `/app/frontend/src/services/api.js` - API service layer
-
-## User Personas
-1. **User** - Takes free test (1x) or premium test after payment
-2. **Admin** - Manages payments, users, questions, certificates, analytics
-3. **Yayasan** - Organization with custom referral link and pricing
-
-## Core Requirements (Static)
-- Free test: 1x per user (isFree=true questions)
-- Premium test: Requires payment approval
-- Price default: Rp 100.000 (editable in admin)
-- Yayasan custom price: Rp 100.000 (editable in yayasan dashboard)
-- No Midtrans - Manual upload proof + admin approval
-- PayDisini production API ID: 3463
+```
+/app
+├── backend/         # FastAPI + MongoDB
+│   ├── routes/      # API routes
+│   ├── services/    # PayDisini service
+│   └── personality_data.py # 9 tipe kepribadian
+└── frontend/        # React + TailwindCSS
+    ├── src/pages/   # Admin, User, Yayasan pages
+    └── src/components/ui/ # Shadcn components
+```
 
 ## What's Been Implemented
 
-### Backend
-- Full backend from GitHub repo installed
-- PayDisini service created (`/app/backend/services/paydisini.py`)
-- Midtrans completely removed from user_payments.py, transactions.py, wallet.py
-- Manual payment upload proof with admin approval
-- JWT_SECRET_KEY env var properly configured
-- 15 test questions seeded (5 free, 10 paid)
-- Admin account seeded: admin@newme.com / admin123
-- Settings seeded: paymentAmount=100000, bankName=BCA
-- **Yayasan commission credit** - 10% commission on referral payments
+### User Flow (Complete)
+1. ✅ Register/Login dengan referral code support
+2. ✅ Free test 5 soal (HANYA 1 KALI) - status jadi "selesai"
+3. ✅ Hasil free test dengan TEASER blur + CTA upgrade premium
+4. ✅ Top-up via QRIS PayDisini atau manual transfer
+5. ✅ Premium test 20 soal
+6. ✅ **Hasil NYATA berdasarkan jawaban** - bukan dummy!
+7. ✅ Sertifikat dengan kepribadian, karakter, kekuatan jatidiri, kompilasi adaptasi
+8. ✅ Download/Share ke WA/FB/IG
+9. ✅ Hasil muncul di dashboard user
 
-### Frontend
-- Full frontend from GitHub repo installed
-- API exports added to App.js (BACKEND_URL, API)
-- PayDisini settings section in admin Settings.jsx
-- Midtrans removed from Shop.jsx
-- Route `/verifikasi-sertifikat` added as alias to `/certificate-verify`
-- Yayasan dashboard with custom price editor
-- Admin dashboard with payments approval
-- **Share buttons** (WA/FB/IG) added to TestResult.jsx
-- **Teaser blur** for free test results to encourage upgrade
+### Test Analysis System (Complete)
+- **5 Elemen**: Kayu, Api, Tanah, Logam, Air
+- **Personality**: Introvert/Extrovert/Ambivert
+- **Interest**: Analitik, Sosial, Praktis, Artistik, Enterprising, Investigatif
+- **Talent**: Komunikasi, Empati, Kinestetik, Logika, Musikal, Visual
+- Setiap jawaban memiliki `scores` dict yang diakumulasi
+- Dominant element dan personality type dihitung dari total scores
+- Lookup ke `PERSONALITY_DATA` untuk insights lengkap
 
-### Payment Flow
-1. User registers → takes free test (1x)
-2. User uploads payment proof image → Admin approves
-3. After approval → user accesses premium test
-4. Premium test result → certificate generated
+### Yayasan Features (Complete)
+- ✅ Registration & Login dengan JWT
+- ✅ Dashboard dengan 5 tabs: Dashboard, Pengguna, Hasil Test, Wallet, Pengaturan
+- ✅ Custom pricing untuk referral users
+- ✅ **Komisi 10%** otomatis credit ke wallet saat payment approved
+- ✅ Withdrawal request (min Rp 50.000)
+- ✅ Admin dapat approve/reject withdrawal
 
-### Yayasan Flow
-1. Yayasan registers at /yayasan/register
-2. Gets referral link: `/register?ref=CODE`
-3. Users who register with code get yayasan's custom price
-4. Yayasan dashboard shows: referral stats, users, custom price editor
-5. **NEW**: Yayasan wallet with commission tracking (10% of referral payments)
-6. **NEW**: Yayasan can request withdrawals (min Rp 50.000)
-7. **NEW**: Admin can approve/reject withdrawals at /admin/withdrawals
+### Admin Features (Complete)
+- ✅ Dashboard dengan analytics
+- ✅ Manage users, payments, questions
+- ✅ Approve payment dengan komisi ke yayasan
+- ✅ Manage yayasan (verify, toggle active)
+- ✅ **Penarikan Yayasan** - approve/reject withdrawals
+- ✅ **Konten Website** dengan file upload (bukan URL input)
+- ✅ Questions dengan proper scoring (5 elemen)
+
+### Payment Integration (Complete)
+- ✅ PayDisini QRIS generation
+- ✅ Manual upload proof image
+- ✅ Admin approval flow
+- ✅ Komisi credit ke yayasan wallet
+
+## Test Results (2026-03-02)
+- **Backend**: 94% (17/18 tests passed)
+- **Frontend**: All features working
+- **Verified**: Hasil test berdasarkan jawaban NYATA bukan dummy
 
 ## API Credentials
 - PayDisini API ID: 3463
 - PayDisini API Key: 2f5f4ce34bcecba908f1038e65cb4624
 - Admin: admin@newme.com / admin123
-- JWT_SECRET_KEY: newme-secret-key-2026
 
-## Prioritized Backlog
+## Key Files
+- `backend/routes/questions.py` - Questions dengan scores dict
+- `backend/routes/test_results.py` - generate_test_analysis()
+- `backend/personality_data.py` - 9 tipe kepribadian
+- `frontend/src/pages/TestResult.jsx` - Sertifikat + share + teaser
+- `frontend/src/pages/admin/WebsiteContent.jsx` - CMS dengan file upload
 
-### P0 (Critical - Done)
-- Install from GitHub
-- Remove Midtrans
-- Add PayDisini
-- Manual upload payment
-- Admin approval
-- Yayasan registration & login
-- Yayasan dashboard (Dashboard, Pengguna, Hasil Test, Wallet, Pengaturan)
-- Yayasan commission credit system
-- Yayasan withdrawal request
-- Admin withdrawal approval
-- Share to WA/FB/IG for test results
-- Free test teaser with blur effect
+## Completed (Session 2)
+1. ✅ Yayasan commission system (10%)
+2. ✅ Admin withdrawal management
+3. ✅ Share buttons WA/FB/IG
+4. ✅ Free test teaser dengan blur
+5. ✅ Questions dengan proper 5-element scoring
+6. ✅ Admin image upload (file, bukan URL)
 
-### P1 (High Priority - Done)
-- Yayasan custom pricing
-- Referral system
-- Free test 1x validation
-- Premium test access after payment
-- Admin analytics
-- Admin yayasan management
-
-### P2 (Future)
-- Certificate PDF template matching exactly to uploaded designs
-- Email notification when payment approved
-- Automated test for certificate image generation
-- WhatsApp notification bot
-- Content management for all website text/images
-
-## Key Features Summary
-
-### Yayasan (Foundation) Features
-| Feature | Status | Location |
-|---------|--------|----------|
-| Registration | Done | /yayasan/register |
-| Login | Done | /yayasan/login |
-| Dashboard Stats | Done | /yayasan/dashboard |
-| View Referral Users | Done | Tab Pengguna |
-| View Test Results | Done | Tab Hasil Test |
-| Wallet Balance | Done | Tab Wallet |
-| Withdrawal Request | Done | Tab Wallet |
-| Custom Price Editor | Done | Tab Pengaturan |
-| Commission Credit | Done | 10% auto-credited |
-
-### Admin Features for Yayasan
-| Feature | Status | Location |
-|---------|--------|----------|
-| List All Yayasan | Done | /admin/yayasan |
-| Verify Yayasan | Done | /admin/yayasan |
-| Toggle Active Status | Done | /admin/yayasan |
-| View Withdrawals | Done | /admin/withdrawals |
-| Approve/Reject Withdrawal | Done | /admin/withdrawals |
-
-### TestResult Enhancements
-| Feature | Status | Description |
-|---------|--------|-------------|
-| Share to WhatsApp | Done | Opens WA with pre-filled text |
-| Share to Facebook | Done | Opens FB share dialog |
-| Share to Instagram | Done | Copies text to clipboard for IG |
-| Free Test Teaser | Done | Blur effect on Karakter, Kekuatan Jatidiri, Kompilasi Adaptasi |
-| Upgrade CTA | Done | Prominent upgrade button for free test results |
-
-## Test Results (2026-03-02)
-- Backend: 100% (20/20 tests)
-- Frontend: 100% - All features working
-- Test file: /app/test_reports/iteration_2.json
-
-## Next Tasks
-1. Configure bank account details in admin settings
-2. Upload real NEWME logo for certificates
-3. Test full user journey end-to-end with real payment
-4. Set up PayDisini callback URL after deployment
+## Remaining Tasks
+- P2: Email notification saat payment approved
+- P2: Certificate PDF template matching exact design
+- Future: WhatsApp notification bot
+- Future: PayDisini callback URL setup after deployment
