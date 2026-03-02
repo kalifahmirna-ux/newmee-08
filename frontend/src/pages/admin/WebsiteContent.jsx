@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Image, Plus, Trash2, Edit, Save, X, ChevronDown, ChevronUp, 
-  RefreshCw, Layout, Users, ShoppingBag, MessageSquare, Activity
+  RefreshCw, Layout, Users, ShoppingBag, MessageSquare, Activity, Upload, Loader2
 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -9,6 +9,103 @@ import { Label } from '../../components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { useToast } from '../../hooks/use-toast';
 import axios from 'axios';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+
+// Image Upload Component
+const ImageUploader = ({ value, onChange, placeholder = 'Upload gambar' }) => {
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const handleFileSelect = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      alert('Format file harus JPG, PNG, GIF, atau WEBP');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Ukuran file maksimal 5MB');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const token = localStorage.getItem('admin_token');
+      const response = await axios.post(`${BACKEND_URL}/api/upload/image`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (response.data.url) {
+        onChange(response.data.url);
+      }
+    } catch (err) {
+      alert(err.response?.data?.detail || 'Gagal upload gambar');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const getImageSrc = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${BACKEND_URL}${url}`;
+  };
+
+  return (
+    <div className="space-y-2">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/gif,image/webp"
+        onChange={handleFileSelect}
+        className="hidden"
+      />
+      {value ? (
+        <div className="relative inline-block">
+          <img
+            src={getImageSrc(value)}
+            alt="Preview"
+            className="w-32 h-32 object-cover rounded-lg border-2 border-yellow-400/30"
+          />
+          <button
+            onClick={() => onChange('')}
+            className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white hover:bg-red-600"
+            type="button"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+          type="button"
+          className="w-32 h-32 border-2 border-dashed border-yellow-400/30 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:border-yellow-400 hover:text-yellow-400 transition bg-[#1a1a1a]"
+        >
+          {uploading ? (
+            <Loader2 className="w-8 h-8 animate-spin" />
+          ) : (
+            <>
+              <Upload className="w-8 h-8 mb-2" />
+              <span className="text-xs text-center px-2">{placeholder}</span>
+            </>
+          )}
+        </button>
+      )}
+    </div>
+  );
+};
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
