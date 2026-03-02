@@ -1,6 +1,7 @@
 """
 Data lengkap untuk 9 tipe kepribadian NEWME CLASS
 Berdasarkan kombinasi Kepribadian (Introvert/Extrovert/Ambivert) dan 5 Element (Kayu/Api/Tanah/Logam/Air)
+Dengan penjelasan sederhana dan rekomendasi karir spesifik
 """
 
 PERSONALITY_DATA = {
@@ -13,57 +14,46 @@ PERSONALITY_DATA = {
         "label": "Si KREATIF",
         "color": "#4CAF50",  # Green
         
+        # Penjelasan sederhana untuk orang awam
+        "penjelasanSederhana": "Anda adalah orang yang pendiam namun memiliki ide-ide kreatif yang luar biasa. Anda lebih suka bekerja sendiri dan menghasilkan karya yang unik dan berbeda dari yang lain.",
+        
         "kepribadian": [
-            "Un_Responsif", "bahasa IMAGINASI", "investigatif", 
-            "Pasif respond", "Un_sensitif", "Kalem", "Penuh Exciting"
+            "Pendiam tapi penuh ide", "Suka berimajinasi", "Teliti dan detail", 
+            "Tenang dan kalem", "Penuh semangat tersembunyi", "Suka hal-hal unik"
         ],
         
         "karakter": [
-            "Pemerhati", "suka beda", "imaginatif", "suka hal baru",
-            "percaya diri", "romantis", "perfectsionis", "penuntut",
-            "idealisme", "percayaan", "khawatiran", "egoistic idea",
-            "dreamer", "sulit ditebak", "ekspresif terukur"
+            "Pengamat yang baik", "Suka tampil beda", "Penuh imajinasi", "Suka hal baru",
+            "Percaya diri", "Romantis", "Perfeksionis", "Idealis",
+            "Pemimpi", "Misterius", "Ekspresif terkontrol"
         ],
         
         "kekuatanJatidiri": {
             "tipe": "Si KREATIF",
-            "kehidupan": "KAYA GAGASAN",
-            "kesehatan": "PENCERNAAN",
-            "kontribusi": "KREATIFITAS",
-            "kekhasan": "BERBEDA",
-            "kharisma": "MENAWAN"
+            "kehidupan": "KAYA IDE & GAGASAN",
+            "kesehatan": "Perhatikan pencernaan",
+            "kontribusi": "Kreativitas tinggi",
+            "kekhasan": "Selalu tampil berbeda",
+            "kharisma": "Daya tarik alami"
         },
         
         "kompilasiAdaptasi": {
-            "belajar": "Mengimajinasikan",
-            "bekerja": "Bebas",
-            "kalibrasi": "Tidur / nonton",
-            "dayaRaga": "Otak kanan",
-            "memimpin": "Organisasi Cipta Budaya",
-            "jalurBisnis": "Owner",
-            "pendukungKarir": "Komunikator",
-            "keahlian": "Negosiator",
-            "karya": "inovatif",
-            "keunggulan": "Menggambarkan",
-            "kemistri": "Karya Cipta",
-            "keutamaan": "Kesempurnaan",
-            "kelimpahan": "Tanggung jawab",
-            "magnet": "Perubahan",
-            "berbusana": "Nyentrik",
-            "kecepatan": "Membayangkan",
-            "kesukaan": "Karya Seni",
-            "kebiasaan": "Berimajinasi",
-            "semestaHidup": "Menciptakan",
-            "makanan": "Unik & Menarik",
-            "kehebatan": "Menyederhanakan"
+            "belajar": "Dengan cara membayangkan dan memvisualisasikan",
+            "bekerja": "Lebih produktif saat diberi kebebasan",
+            "kalibrasi": "Istirahat dengan menonton atau tidur",
+            "memimpin": "Cocok memimpin organisasi kreatif",
+            "jalurBisnis": "Cocok jadi pemilik usaha sendiri"
         },
         
         "ciriKhas": [
-            "Menarik", "Tampil Beda", "Charming", 
-            "Berat Badan cend. mudah naik", "Bicara nambah wawasan"
+            "Penampilan menarik", "Selalu tampil beda", "Punya daya tarik", 
+            "Wawasan luas", "Suka berkarya"
         ],
         
-        "dibutuhkanPadaProfesi": "Yang memerlukan KREATIFITAS & SISTEM"
+        "dibutuhkanPadaProfesi": "Yang memerlukan KREATIFITAS & SISTEM",
+        
+        # REKOMENDASI KARIR SPESIFIK
+        "rekomendasiKarir": "Desainer Grafis, Arsitek, Penulis, Seniman, Animator, Content Creator, Fashion Designer, Interior Designer, Sutradara Film, Fotografer, Game Developer, UI/UX Designer"
     },
     
     "iT": {
@@ -74,9 +64,11 @@ PERSONALITY_DATA = {
         "label": "Si AKTIF",
         "color": "#FFC107",  # Yellow/Gold
         
+        "penjelasanSederhana": "Anda adalah orang yang tekun, rajin, dan sangat bisa diandalkan. Meski pendiam, Anda selalu bekerja keras dan konsisten dalam mencapai tujuan.",
+        
         "kepribadian": [
-            "Minus Responsif", "bahasa FAKTA", "investigatif",
-            "Fasif respond", "un_sensitif", "lambat tersinggung"
+            "Pendiam tapi pekerja keras", "Suka fakta dan data", "Teliti",
+            "Sabar", "Tidak mudah tersinggung", "Stabil dan konsisten"
         ],
         
         "karakter": [
