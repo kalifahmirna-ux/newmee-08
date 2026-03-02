@@ -219,30 +219,55 @@ export default function TestResult() {
               </p>
             </section>
 
-            {/* Karakter */}
-            <section className="mb-4">
+            {/* Karakter - TEASER for free test */}
+            <section className="mb-4 relative">
               <h3 className="font-black text-sm text-gray-900 border-b pb-1 mb-2" style={{ borderColor: '#d4af37' }}>
                 +/- Karakter :
               </h3>
-              <p className="text-xs text-gray-700 leading-relaxed">
-                {karakter.join(' - ')}
-              </p>
+              {result.testType === 'free' ? (
+                <div className="relative">
+                  <p className="text-xs text-gray-700 leading-relaxed blur-sm select-none">
+                    {karakter.length > 0 ? karakter.join(' - ') : 'Karakter lengkap tersedia di Test Premium'}
+                  </p>
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white/80 flex items-center justify-center">
+                    <span className="bg-yellow-400 text-black text-xs font-bold px-3 py-1 rounded-full animate-pulse">
+                      UPGRADE KE PREMIUM
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-xs text-gray-700 leading-relaxed">
+                  {karakter.join(' - ')}
+                </p>
+              )}
             </section>
 
-            {/* Kekuatan Jatidiri */}
-            <section className="mb-4">
+            {/* Kekuatan Jatidiri - TEASER for free test */}
+            <section className="mb-4 relative">
               <h3 className="font-black text-sm text-gray-900 border-b pb-1 mb-1" style={{ borderColor: '#d4af37' }}>
                 Kekuatan Jatidiri :{' '}
                 <span className="text-yellow-600">{kj.tipe || 'Si UNIK'}</span>
               </h3>
-              <div className="text-xs text-gray-700 space-y-0.5">
-                {kj.kehidupan && <p>Kehidupan : <strong>{kj.kehidupan}</strong> - Kesehatan : <strong>{kj.kesehatan}</strong></p>}
-                {kj.kontribusi && <p>Kontribusi : <strong>{kj.kontribusi}</strong> - Kekhasan : <strong>{kj.kekhasan}</strong> - Kharisma : <strong>{kj.kharisma}</strong></p>}
-              </div>
+              {result.testType === 'free' ? (
+                <div className="relative">
+                  <div className="text-xs text-gray-700 space-y-0.5 blur-sm select-none">
+                    <p>Kehidupan : <strong>***</strong> - Kesehatan : <strong>***</strong></p>
+                    <p>Kontribusi : <strong>***</strong> - Kekhasan : <strong>***</strong></p>
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-yellow-600 text-xs font-bold">Tersedia di Premium</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-xs text-gray-700 space-y-0.5">
+                  {kj.kehidupan && <p>Kehidupan : <strong>{kj.kehidupan}</strong> - Kesehatan : <strong>{kj.kesehatan}</strong></p>}
+                  {kj.kontribusi && <p>Kontribusi : <strong>{kj.kontribusi}</strong> - Kekhasan : <strong>{kj.kekhasan}</strong> - Kharisma : <strong>{kj.kharisma}</strong></p>}
+                </div>
+              )}
             </section>
 
-            {/* Kompilasi Adaptasi */}
-            {Object.keys(ka).length > 0 && (
+            {/* Kompilasi Adaptasi - Only for Premium */}
+            {result.testType === 'paid' && Object.keys(ka).length > 0 && (
               <section className="mb-4">
                 <h3 className="font-black text-sm text-gray-900 border-b pb-1 mb-2" style={{ borderColor: '#d4af37' }}>
                   Kompilasi Adaptasi :
@@ -252,6 +277,23 @@ export default function TestResult() {
                     `${k.replace(/([A-Z])/g, ' $1').trim()} : ${v}`
                   ).join(' - ')}
                 </p>
+              </section>
+            )}
+            
+            {/* Kompilasi Adaptasi TEASER for Free */}
+            {result.testType === 'free' && (
+              <section className="mb-4">
+                <h3 className="font-black text-sm text-gray-900 border-b pb-1 mb-2" style={{ borderColor: '#d4af37' }}>
+                  Kompilasi Adaptasi :
+                </h3>
+                <div className="relative">
+                  <div className="text-xs text-gray-400 blur-sm select-none">
+                    Analisis komprehensif tentang cara Anda beradaptasi dalam berbagai situasi...
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="bg-gray-200 text-gray-600 text-xs px-2 py-1 rounded">Khusus Premium</span>
+                  </div>
+                </div>
               </section>
             )}
 
