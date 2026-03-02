@@ -309,7 +309,11 @@ PERSONALITY_DATA = {
             "Fisik kering", "Bicara bermakna"
         ],
         
-        "dibutuhkanPadaProfesi": "Yang memerlukan KEBIJAKSANAAN & VISI"
+        "dibutuhkanPadaProfesi": "Yang memerlukan KEBIJAKSANAAN & VISI",
+        
+        "penjelasanSederhana": "Anda adalah orang yang sangat bijaksana dan mendalam. Anda suka berpikir jauh ke depan dan memahami esensi dari segala sesuatu.",
+        
+        "rekomendasiKarir": "Filsuf, Peneliti, Dosen, Penulis Buku, Konsultan Strategi, Ahli Riset, Analis Kebijakan, Pustakawan, Sejarawan, Pengamat Politik, Spiritualis"
     },
     
     # ============= EXTROVERT TYPES =============
@@ -321,9 +325,11 @@ PERSONALITY_DATA = {
         "label": "Si KREATIF",
         "color": "#4CAF50",
         
+        "penjelasanSederhana": "Anda adalah orang yang kreatif dan ekspresif. Anda suka berbagi ide dengan orang lain dan menginspirasi banyak orang dengan kreativitas Anda.",
+        
         "kepribadian": [
-            "Extra Responsif", "bahasa IMAGINASI", "kurang investigatif",
-            "extra aktif", "lebih sensitif", "mudah tersinggung"
+            "Sangat ekspresif", "Penuh imajinasi", "Aktif berbagi ide",
+            "Antusias", "Sensitif", "Mudah bersemangat"
         ],
         
         "karakter": [
@@ -342,27 +348,11 @@ PERSONALITY_DATA = {
         },
         
         "kompilasiAdaptasi": {
-            "belajar": "Diskusi Kreatif",
-            "bekerja": "Tim Kreatif",
-            "kalibrasi": "Traveling",
-            "dayaRaga": "Otak kanan aktif",
-            "memimpin": "Startup",
-            "jalurBisnis": "Founder",
-            "pendukungKarir": "Networking",
-            "keahlian": "Pitching",
-            "karya": "Disruptif",
-            "keunggulan": "Menginspirasi",
-            "kemistri": "Kolaborasi Kreatif",
-            "keutamaan": "Inovasi",
-            "kelimpahan": "Ide",
-            "magnet": "Kebaruan",
-            "berbusana": "Statement",
-            "kecepatan": "Ideasi",
-            "kesukaan": "Brainstorming",
-            "kebiasaan": "Eksplorasi",
-            "semestaHidup": "Menciptakan Tren",
-            "makanan": "Eksotis",
-            "kehebatan": "Memvisualisasikan Masa Depan"
+            "belajar": "Diskusi dan brainstorming",
+            "bekerja": "Dalam tim kreatif",
+            "kalibrasi": "Traveling dan eksplorasi",
+            "memimpin": "Cocok memimpin startup",
+            "jalurBisnis": "Cocok jadi founder"
         },
         
         "ciriKhas": [
@@ -370,7 +360,9 @@ PERSONALITY_DATA = {
             "Ekspresif", "Bicara memotivasi"
         ],
         
-        "dibutuhkanPadaProfesi": "Yang memerlukan KREATIFITAS & KOMUNIKASI"
+        "dibutuhkanPadaProfesi": "Yang memerlukan KREATIFITAS & KOMUNIKASI",
+        
+        "rekomendasiKarir": "YouTuber, Influencer, Art Director, Creative Director, Public Speaker, MC/Host, Aktor, Presenter TV, Advertising Executive, Brand Manager, Entrepreneur Kreatif"
     },
     
     "eT": {
