@@ -45,26 +45,29 @@ Install repository https://github.com/dwipuspaanggita-sketch/newme07 ke environm
 - No Midtrans - Manual upload proof + admin approval
 - PayDisini production API ID: 3463
 
-## What's Been Implemented (2026-03-01)
+## What's Been Implemented
 
 ### Backend
-- ✅ Full backend from GitHub repo installed
-- ✅ PayDisini service created (`/app/backend/services/paydisini.py`)
-- ✅ Midtrans completely removed from user_payments.py, transactions.py, wallet.py
-- ✅ Manual payment upload proof with admin approval
-- ✅ JWT_SECRET_KEY env var added (was JWT_SECRET mismatch)
-- ✅ 15 test questions seeded (5 free, 10 paid)
-- ✅ Admin account seeded: admin@newme.com / admin123
-- ✅ Settings seeded: paymentAmount=100000, bankName=BCA
+- Full backend from GitHub repo installed
+- PayDisini service created (`/app/backend/services/paydisini.py`)
+- Midtrans completely removed from user_payments.py, transactions.py, wallet.py
+- Manual payment upload proof with admin approval
+- JWT_SECRET_KEY env var properly configured
+- 15 test questions seeded (5 free, 10 paid)
+- Admin account seeded: admin@newme.com / admin123
+- Settings seeded: paymentAmount=100000, bankName=BCA
+- **Yayasan commission credit** - 10% commission on referral payments
 
 ### Frontend
-- ✅ Full frontend from GitHub repo installed
-- ✅ API exports added to App.js (BACKEND_URL, API)
-- ✅ PayDisini settings section in admin Settings.jsx
-- ✅ Midtrans removed from Shop.jsx
-- ✅ Route `/verifikasi-sertifikat` added as alias to `/certificate-verify`
-- ✅ Yayasan dashboard with custom price editor
-- ✅ Admin dashboard with payments approval
+- Full frontend from GitHub repo installed
+- API exports added to App.js (BACKEND_URL, API)
+- PayDisini settings section in admin Settings.jsx
+- Midtrans removed from Shop.jsx
+- Route `/verifikasi-sertifikat` added as alias to `/certificate-verify`
+- Yayasan dashboard with custom price editor
+- Admin dashboard with payments approval
+- **Share buttons** (WA/FB/IG) added to TestResult.jsx
+- **Teaser blur** for free test results to encourage upgrade
 
 ### Payment Flow
 1. User registers → takes free test (1x)
@@ -77,6 +80,9 @@ Install repository https://github.com/dwipuspaanggita-sketch/newme07 ke environm
 2. Gets referral link: `/register?ref=CODE`
 3. Users who register with code get yayasan's custom price
 4. Yayasan dashboard shows: referral stats, users, custom price editor
+5. **NEW**: Yayasan wallet with commission tracking (10% of referral payments)
+6. **NEW**: Yayasan can request withdrawals (min Rp 50.000)
+7. **NEW**: Admin can approve/reject withdrawals at /admin/withdrawals
 
 ## API Credentials
 - PayDisini API ID: 3463
@@ -85,26 +91,73 @@ Install repository https://github.com/dwipuspaanggita-sketch/newme07 ke environm
 - JWT_SECRET_KEY: newme-secret-key-2026
 
 ## Prioritized Backlog
+
 ### P0 (Critical - Done)
-- ✅ Install from GitHub
-- ✅ Remove Midtrans
-- ✅ Add PayDisini
-- ✅ Manual upload payment
-- ✅ Admin approval
+- Install from GitHub
+- Remove Midtrans
+- Add PayDisini
+- Manual upload payment
+- Admin approval
+- Yayasan registration & login
+- Yayasan dashboard (Dashboard, Pengguna, Hasil Test, Wallet, Pengaturan)
+- Yayasan commission credit system
+- Yayasan withdrawal request
+- Admin withdrawal approval
+- Share to WA/FB/IG for test results
+- Free test teaser with blur effect
 
 ### P1 (High Priority - Done)
-- ✅ Yayasan custom pricing
-- ✅ Referral system
-- ✅ Free test 1x validation
-- ✅ Premium test access after payment
-- ✅ Admin analytics
+- Yayasan custom pricing
+- Referral system
+- Free test 1x validation
+- Premium test access after payment
+- Admin analytics
+- Admin yayasan management
 
 ### P2 (Future)
 - Certificate PDF template matching exactly to uploaded designs
 - Email notification when payment approved
-- QR code integration with PayDisini for bank transfers
 - Automated test for certificate image generation
 - WhatsApp notification bot
+- Content management for all website text/images
+
+## Key Features Summary
+
+### Yayasan (Foundation) Features
+| Feature | Status | Location |
+|---------|--------|----------|
+| Registration | Done | /yayasan/register |
+| Login | Done | /yayasan/login |
+| Dashboard Stats | Done | /yayasan/dashboard |
+| View Referral Users | Done | Tab Pengguna |
+| View Test Results | Done | Tab Hasil Test |
+| Wallet Balance | Done | Tab Wallet |
+| Withdrawal Request | Done | Tab Wallet |
+| Custom Price Editor | Done | Tab Pengaturan |
+| Commission Credit | Done | 10% auto-credited |
+
+### Admin Features for Yayasan
+| Feature | Status | Location |
+|---------|--------|----------|
+| List All Yayasan | Done | /admin/yayasan |
+| Verify Yayasan | Done | /admin/yayasan |
+| Toggle Active Status | Done | /admin/yayasan |
+| View Withdrawals | Done | /admin/withdrawals |
+| Approve/Reject Withdrawal | Done | /admin/withdrawals |
+
+### TestResult Enhancements
+| Feature | Status | Description |
+|---------|--------|-------------|
+| Share to WhatsApp | Done | Opens WA with pre-filled text |
+| Share to Facebook | Done | Opens FB share dialog |
+| Share to Instagram | Done | Copies text to clipboard for IG |
+| Free Test Teaser | Done | Blur effect on Karakter, Kekuatan Jatidiri, Kompilasi Adaptasi |
+| Upgrade CTA | Done | Prominent upgrade button for free test results |
+
+## Test Results (2026-03-02)
+- Backend: 100% (20/20 tests)
+- Frontend: 100% - All features working
+- Test file: /app/test_reports/iteration_2.json
 
 ## Next Tasks
 1. Configure bank account details in admin settings
