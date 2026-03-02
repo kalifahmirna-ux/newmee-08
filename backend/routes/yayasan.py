@@ -334,7 +334,105 @@ async def get_yayasan_users(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
-@router.get("/check-referral/{code}", response_model=dict)
+@router.get("/test-results", response_model=List[dict])
+async def get_yayasan_test_results(
+    current_yayasan: dict = Depends(get_current_yayasan),
+    skip: int = 0,
+    limit: int = 50
+):
+    """Get premium test results of users who used this yayasan's referral code"""
+    try:
+        referral_code = current_yayasan["referralCode"]
+        # Find users with this referral code
+        referral_users = await db.users.find(
+            {"usedReferralCode": referral_code},
+            {"_id": 1, "fullName": 1, "email": 1}
+        ).to_list(500)
+        user_ids = [str(u["_id"]) for u in referral_users]
+        user_map = {str(u["_id"]): u for u in referral_users}
+
+        if not user_ids:
+            return []
+
+        results = await db.test_results.find(
+            {"userId": {"$in": user_ids}, "testType": "paid"}
+        ).sort("createdAt", -1).skip(skip).limit(limit).to_list(limit)
+
+        for r in results:
+            r["_id"] = str(r["_id"])
+            user = user_map.get(r.get("userId"), {})
+            r["userName"] = user.get("fullName", "")
+            r["userEmail"] = user.get("email", "")
+        return results
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+@router.get("/wallet", response_model=dict)
+async def get_yayasan_wallet(current_yayasan: dict = Depends(get_current_yayasan)):
+    """Get yayasan wallet balance and transactions"""
+    try:
+        yayasan_id = str(current_yayasan["_id"])
+        wallet = await db.yayasan_wallets.find_one({"yayasanId": yayasan_id}) or {"balance": 0}
+        txns = await db.yayasan_transactions.find(
+            {"yayasanId": yayasan_id}
+        ).sort("createdAt", -1).limit(20).to_list(20)
+        for t in txns:
+            t["_id"] = str(t["_id"])
+        return {
+            "balance": wallet.get("balance", 0),
+            "transactions": txns
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+@router.post("/wallet/withdraw", response_model=dict)
+async def request_yayasan_withdrawal(
+    request: dict,
+    current_yayasan: dict = Depends(get_current_yayasan)
+):
+    """Request withdrawal from yayasan wallet"""
+    try:
+        amount = request.get("amount", 0)
+        bank_name = request.get("bankName", "")
+        bank_account = request.get("bankAccount", "")
+        account_name = request.get("accountName", "")
+
+        if amount < 50000:
+            raise HTTPException(status_code=400, detail="Minimal penarikan Rp 50.000")
+
+        yayasan_id = str(current_yayasan["_id"])
+        wallet = await db.yayasan_wallets.find_one({"yayasanId": yayasan_id})
+        balance = wallet.get("balance", 0) if wallet else 0
+
+        if balance < amount:
+            raise HTTPException(status_code=400, detail="Saldo tidak mencukupi")
+
+        # Deduct balance and create withdrawal request
+        await db.yayasan_wallets.update_one(
+            {"yayasanId": yayasan_id},
+            {"$inc": {"balance": -amount}},
+            upsert=True
+        )
+        await db.yayasan_transactions.insert_one({
+            "yayasanId": yayasan_id,
+            "type": "withdrawal",
+            "amount": amount,
+            "bankName": bank_name,
+            "bankAccount": bank_account,
+            "accountName": account_name,
+            "status": "pending",
+            "createdAt": datetime.utcnow()
+        })
+        return {"success": True, "message": "Permintaan penarikan berhasil diajukan"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+
 async def check_yayasan_referral(code: str):
     """Check if a referral code belongs to a yayasan and get the price"""
     try:
