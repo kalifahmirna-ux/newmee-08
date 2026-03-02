@@ -215,6 +215,16 @@ async def approve_payment(
                         "paymentDate": datetime.utcnow()
                     }}
                 )
+                
+                # Credit yayasan commission if payment has referral code
+                referral_code = payment.get("referralCode")
+                if referral_code:
+                    await credit_yayasan_commission(
+                        referral_code=referral_code,
+                        payment_amount=payment.get("grossAmount", 0),
+                        user_id=payment.get("userId"),
+                        payment_id=payment_id
+                    )
         else:
             await db.payments.update_one(
                 {"_id": ObjectId(payment_id)},
@@ -282,3 +292,46 @@ async def get_payment_stats(token_data: dict = Depends(verify_token)):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+async def credit_yayasan_commission(referral_code: str, payment_amount: float, user_id: str, payment_id: str):
+    """Credit commission to yayasan wallet when referred user payment is approved"""
+    try:
+        # Find yayasan by referral code
+        yayasan = await db.yayasan.find_one({"referralCode": referral_code, "isActive": True})
+        if not yayasan:
+            return
+        
+        yayasan_id = str(yayasan["_id"])
+        
+        # Calculate commission (10% of payment)
+        commission_rate = 0.10
+        commission_amount = payment_amount * commission_rate
+        
+        # Update or create yayasan wallet
+        await db.yayasan_wallets.update_one(
+            {"yayasanId": yayasan_id},
+            {"$inc": {"balance": commission_amount}},
+            upsert=True
+        )
+        
+        # Record transaction
+        await db.yayasan_transactions.insert_one({
+            "yayasanId": yayasan_id,
+            "type": "commission",
+            "amount": commission_amount,
+            "paymentId": payment_id,
+            "referredUserId": user_id,
+            "status": "completed",
+            "description": f"Komisi referral ({commission_rate*100:.0f}%)",
+            "createdAt": datetime.utcnow()
+        })
+        
+        # Update yayasan total earnings
+        await db.yayasan.update_one(
+            {"_id": yayasan["_id"]},
+            {"$inc": {"totalEarnings": commission_amount, "totalReferrals": 1}}
+        )
+        
+    except Exception as e:
+        print(f"Error crediting yayasan commission: {str(e)}")
