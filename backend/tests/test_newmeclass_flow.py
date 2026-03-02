@@ -10,6 +10,9 @@ import time
 
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://yayasan-hub.preview.emergentagent.com')
 
+# Global variables to share between tests
+_shared_state = {}
+
 # =========== TEST USER CREDENTIALS ===========
 TEST_USER_EMAIL = f"test_flow_{uuid.uuid4().hex[:8]}@demo.com"
 TEST_USER_PASSWORD = "test123"
@@ -28,7 +31,9 @@ class TestAuthFlow:
             "birthDate": "1990-01-15",
             "province": "DKI Jakarta",
             "city": "Jakarta Selatan",
-            "district": "Kebayoran Baru"
+            "district": "Kebayoran Baru",
+            "referralSource": "google",  # Required field
+            "userType": "individual"
         })
         
         print(f"Registration response: {response.status_code}")
@@ -41,11 +46,11 @@ class TestAuthFlow:
         
         # Store token if returned
         if "token" in data:
-            pytest.test_user_token = data["token"]
-            pytest.test_user_id = data.get("user", {}).get("id") or data.get("user", {}).get("_id")
+            _shared_state['token'] = data["token"]
+            _shared_state['user_id'] = data.get("user", {}).get("id") or data.get("user", {}).get("_id")
         else:
-            pytest.test_user_token = None
-            pytest.test_user_id = data.get("id") or data.get("_id") or data.get("userId")
+            _shared_state['token'] = None
+            _shared_state['user_id'] = data.get("id") or data.get("_id") or data.get("userId")
     
     def test_02_user_login(self):
         """Test user login"""
@@ -60,16 +65,16 @@ class TestAuthFlow:
         data = response.json()
         assert "token" in data, "Login should return token"
         
-        pytest.test_user_token = data["token"]
+        _shared_state['token'] = data["token"]
         user_data = data.get("user", {})
-        pytest.test_user_id = user_data.get("id") or user_data.get("_id")
+        _shared_state['user_id'] = user_data.get("id") or user_data.get("_id")
         
-        print(f"Login successful, user_id: {pytest.test_user_id}")
-        assert pytest.test_user_id is not None, "User ID should be returned"
+        print(f"Login successful, user_id: {_shared_state['user_id']}")
+        assert _shared_state['user_id'] is not None, "User ID should be returned"
     
     def test_03_get_user_profile(self):
         """Test getting user profile"""
-        headers = {"Authorization": f"Bearer {pytest.test_user_token}"}
+        headers = {"Authorization": f"Bearer {_shared_state.get('token')}"}
         response = requests.get(f"{BASE_URL}/api/auth/profile", headers=headers)
         
         assert response.status_code == 200, f"Get profile failed: {response.text}"
@@ -79,8 +84,8 @@ class TestAuthFlow:
         assert data.get("fullName") == TEST_USER_NAME
         
         # Update user ID from profile if not set
-        if not pytest.test_user_id:
-            pytest.test_user_id = data.get("id") or data.get("_id")
+        if not _shared_state.get('user_id'):
+            _shared_state['user_id'] = data.get("id") or data.get("_id")
         
         print(f"Profile retrieved: {data.get('fullName')}")
 
@@ -99,7 +104,7 @@ class TestQuestionsAPI:
         assert len(questions) >= 25, f"Should have at least 25 questions (5 free + 20 paid), got {len(questions)}"
         
         # Store questions for later tests
-        pytest.all_questions = questions
+        _shared_state['all_questions'] = questions
         print(f"Total questions: {len(questions)}")
     
     def test_05_get_free_questions(self):
@@ -112,7 +117,7 @@ class TestQuestionsAPI:
         assert isinstance(questions, list)
         assert len(questions) == 5, f"Free test should have exactly 5 questions, got {len(questions)}"
         
-        pytest.free_questions = questions
+        _shared_state['free_questions'] = questions
         print(f"Free questions count: {len(questions)}")
         
         # Verify each question has proper scores structure
@@ -137,7 +142,7 @@ class TestQuestionsAPI:
         assert isinstance(questions, list)
         assert len(questions) == 20, f"Paid test should have exactly 20 questions, got {len(questions)}"
         
-        pytest.paid_questions = questions
+        _shared_state['paid_questions'] = questions
         print(f"Paid questions count: {len(questions)}")
         
         # Verify scoring structure
@@ -150,7 +155,11 @@ class TestFreeTestFlow:
     
     def test_07_check_free_test_available(self):
         """Check if free test is available for new user"""
-        response = requests.get(f"{BASE_URL}/api/test-results/check-free-test/{pytest.test_user_id}")
+        user_id = _shared_state.get('user_id')
+        if not user_id:
+            pytest.skip("No user ID available")
+        
+        response = requests.get(f"{BASE_URL}/api/test-results/check-free-test/{user_id}")
         
         assert response.status_code == 200, f"Check free test failed: {response.text}"
         
@@ -160,14 +169,22 @@ class TestFreeTestFlow:
     
     def test_08_submit_free_test_with_real_answers(self):
         """Submit free test with real answers and verify analysis"""
+        user_id = _shared_state.get('user_id')
+        token = _shared_state.get('token')
+        
+        if not user_id or not token:
+            pytest.skip("User not logged in")
+        
         # Use questions from previous test
-        if not hasattr(pytest, 'free_questions') or not pytest.free_questions:
+        if not _shared_state.get('free_questions'):
             response = requests.get(f"{BASE_URL}/api/questions?testType=free")
-            pytest.free_questions = response.json()
+            _shared_state['free_questions'] = response.json()
+        
+        free_questions = _shared_state.get('free_questions', [])
         
         # Build answers - select options that favor specific elements
         answers = {}
-        for i, q in enumerate(pytest.free_questions):
+        for i, q in enumerate(free_questions):
             question_id = q.get("_id")
             # Select different options to create variety in scores
             option_index = i % len(q.get("options", []))
@@ -175,7 +192,7 @@ class TestFreeTestFlow:
         
         # Submit test
         response = requests.post(f"{BASE_URL}/api/test-results", json={
-            "userId": pytest.test_user_id,
+            "userId": user_id,
             "testType": "free",
             "results": {
                 "totalScore": 0,
@@ -184,7 +201,7 @@ class TestFreeTestFlow:
                 "totalQuestions": 5
             },
             "answers": answers
-        }, headers={"Authorization": f"Bearer {pytest.test_user_token}"})
+        }, headers={"Authorization": f"Bearer {token}"})
         
         print(f"Free test submit response: {response.status_code}")
         assert response.status_code == 200, f"Submit free test failed: {response.text}"
@@ -209,14 +226,18 @@ class TestFreeTestFlow:
         assert total_score > 0, f"Element scores should be calculated from answers: {element_scores}"
         
         # Store result ID for later
-        pytest.free_test_result_id = data.get("resultId")
-        pytest.free_test_analysis = analysis
-        print(f"Free test completed. Result ID: {pytest.free_test_result_id}")
+        _shared_state['free_test_result_id'] = data.get("resultId")
+        _shared_state['free_test_analysis'] = analysis
+        print(f"Free test completed. Result ID: {_shared_state['free_test_result_id']}")
         print(f"Element scores: {element_scores}")
     
     def test_09_verify_free_test_used(self):
         """Verify free test is now marked as used"""
-        response = requests.get(f"{BASE_URL}/api/test-results/check-free-test/{pytest.test_user_id}")
+        user_id = _shared_state.get('user_id')
+        if not user_id:
+            pytest.skip("No user ID available")
+        
+        response = requests.get(f"{BASE_URL}/api/test-results/check-free-test/{user_id}")
         
         assert response.status_code == 200
         
@@ -226,9 +247,15 @@ class TestFreeTestFlow:
     
     def test_10_get_free_test_result(self):
         """Get free test result and verify teaser content"""
+        result_id = _shared_state.get('free_test_result_id')
+        token = _shared_state.get('token')
+        
+        if not result_id:
+            pytest.skip("No free test result ID")
+        
         response = requests.get(
-            f"{BASE_URL}/api/test-results/{pytest.free_test_result_id}",
-            headers={"Authorization": f"Bearer {pytest.test_user_token}"}
+            f"{BASE_URL}/api/test-results/{result_id}",
+            headers={"Authorization": f"Bearer {token}"}
         )
         
         assert response.status_code == 200, f"Get result failed: {response.text}"
@@ -252,15 +279,19 @@ class TestWalletTopUp:
     
     def test_11_get_wallet_balance(self):
         """Get user wallet balance"""
-        response = requests.get(f"{BASE_URL}/api/wallet/balance/{pytest.test_user_id}")
+        user_id = _shared_state.get('user_id')
+        if not user_id:
+            pytest.skip("No user ID")
+        
+        response = requests.get(f"{BASE_URL}/api/wallet/balance/{user_id}")
         
         assert response.status_code == 200, f"Get wallet failed: {response.text}"
         
         data = response.json()
         assert "balance" in data, "Should return balance"
         
-        pytest.initial_balance = data.get("balance", 0)
-        print(f"Initial wallet balance: {pytest.initial_balance}")
+        _shared_state['initial_balance'] = data.get("balance", 0)
+        print(f"Initial wallet balance: {_shared_state['initial_balance']}")
     
     def test_12_get_test_price(self):
         """Get test price from settings"""
@@ -269,11 +300,11 @@ class TestWalletTopUp:
         # May return 404 if settings not configured, default to 50000
         if response.status_code == 200:
             data = response.json()
-            pytest.test_price = data.get("testPrice", 50000)
+            _shared_state['test_price'] = data.get("testPrice", 50000)
         else:
-            pytest.test_price = 50000
+            _shared_state['test_price'] = 50000
         
-        print(f"Test price: {pytest.test_price}")
+        print(f"Test price: {_shared_state['test_price']}")
 
 
 class TestPremiumTestFlow:
@@ -281,6 +312,12 @@ class TestPremiumTestFlow:
     
     def test_13_submit_premium_test_with_real_answers(self):
         """Submit premium test with real answers (20 questions)"""
+        user_id = _shared_state.get('user_id')
+        token = _shared_state.get('token')
+        
+        if not user_id or not token:
+            pytest.skip("User not logged in")
+        
         # Get paid questions
         response = requests.get(f"{BASE_URL}/api/questions?testType=paid")
         paid_questions = response.json()
@@ -297,7 +334,7 @@ class TestPremiumTestFlow:
         
         # Submit premium test
         response = requests.post(f"{BASE_URL}/api/test-results", json={
-            "userId": pytest.test_user_id,
+            "userId": user_id,
             "testType": "paid",
             "results": {
                 "totalScore": 0,
@@ -306,7 +343,7 @@ class TestPremiumTestFlow:
                 "totalQuestions": 20
             },
             "answers": answers
-        }, headers={"Authorization": f"Bearer {pytest.test_user_token}"})
+        }, headers={"Authorization": f"Bearer {token}"})
         
         print(f"Premium test submit response: {response.status_code}")
         assert response.status_code == 200, f"Submit premium test failed: {response.text}"
@@ -316,16 +353,22 @@ class TestPremiumTestFlow:
         assert "resultId" in data
         assert "analysis" in data
         
-        pytest.premium_test_result_id = data.get("resultId")
-        pytest.premium_test_analysis = data.get("analysis", {})
+        _shared_state['premium_test_result_id'] = data.get("resultId")
+        _shared_state['premium_test_analysis'] = data.get("analysis", {})
         
-        print(f"Premium test completed. Result ID: {pytest.premium_test_result_id}")
+        print(f"Premium test completed. Result ID: {_shared_state['premium_test_result_id']}")
     
     def test_14_verify_premium_analysis_complete(self):
         """Verify premium test has complete analysis"""
+        result_id = _shared_state.get('premium_test_result_id')
+        token = _shared_state.get('token')
+        
+        if not result_id:
+            pytest.skip("No premium test result")
+        
         response = requests.get(
-            f"{BASE_URL}/api/test-results/{pytest.premium_test_result_id}",
-            headers={"Authorization": f"Bearer {pytest.test_user_token}"}
+            f"{BASE_URL}/api/test-results/{result_id}",
+            headers={"Authorization": f"Bearer {token}"}
         )
         
         assert response.status_code == 200
@@ -342,13 +385,6 @@ class TestPremiumTestFlow:
         
         # Check for insights (from personality_data.py)
         insights = analysis.get("insights", {})
-        
-        # Premium insights should include:
-        # - kekuatanJatidiri (strength identity)
-        # - kompilasiAdaptasi (adaptation compilation)
-        # - karakter
-        # - ciriKhas
-        # - dibutuhkanPadaProfesi
         
         print(f"Premium analysis insights keys: {list(insights.keys())}")
         
@@ -367,7 +403,12 @@ class TestUserResults:
     
     def test_15_get_user_test_results(self):
         """Get all test results for user"""
-        response = requests.get(f"{BASE_URL}/api/test-results/user/{pytest.test_user_id}")
+        user_id = _shared_state.get('user_id')
+        
+        if not user_id:
+            pytest.skip("No user ID")
+        
+        response = requests.get(f"{BASE_URL}/api/test-results/user/{user_id}")
         
         assert response.status_code == 200, f"Get user results failed: {response.text}"
         
@@ -386,7 +427,12 @@ class TestUserResults:
     
     def test_16_get_latest_result(self):
         """Get latest test result"""
-        response = requests.get(f"{BASE_URL}/api/test-results/latest/{pytest.test_user_id}")
+        user_id = _shared_state.get('user_id')
+        
+        if not user_id:
+            pytest.skip("No user ID")
+        
+        response = requests.get(f"{BASE_URL}/api/test-results/latest/{user_id}")
         
         assert response.status_code == 200
         
@@ -415,7 +461,7 @@ class TestAdminLogin:
         token_key = "access_token" if "access_token" in data else "token"
         assert token_key in data, f"Admin login should return token: {data.keys()}"
         
-        pytest.admin_token = data.get(token_key)
+        _shared_state['admin_token'] = data.get(token_key)
         print("Admin login successful")
 
 
@@ -443,7 +489,9 @@ class TestAnalysisAccuracy:
             "birthDate": "1990-01-15",
             "province": "DKI Jakarta",
             "city": "Jakarta",
-            "district": "Central"
+            "district": "Central",
+            "referralSource": "google",
+            "userType": "individual"
         })
         
         login_resp = requests.post(f"{BASE_URL}/api/auth/login", json={
@@ -477,7 +525,9 @@ class TestAnalysisAccuracy:
                     "birthDate": "1990-01-15",
                     "province": "DKI Jakarta",
                     "city": "Jakarta",
-                    "district": "Central"
+                    "district": "Central",
+                    "referralSource": "google",
+                    "userType": "individual"
                 })
                 
                 login_resp2 = requests.post(f"{BASE_URL}/api/auth/login", json={
