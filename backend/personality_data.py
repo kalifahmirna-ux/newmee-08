@@ -181,7 +181,11 @@ PERSONALITY_DATA = {
             "Berat Badan cenderung mudah naik", "Bicara bikin Mikir"
         ],
         
-        "dibutuhkanPadaProfesi": "Yang memerlukan kekuatan ANALISA & DATA"
+        "dibutuhkanPadaProfesi": "Yang memerlukan kekuatan ANALISA & DATA",
+        
+        "penjelasanSederhana": "Anda adalah orang yang sangat logis, analitis, dan terstruktur. Anda hebat dalam menganalisa data dan membuat keputusan berdasarkan fakta.",
+        
+        "rekomendasiKarir": "Akuntan, Analis Data, Programmer, Dokter, Peneliti, Insinyur, Pilot, Bankir, Hakim, Jaksa, Notaris, Auditor, Statistik, Ekonom, Manajer Keuangan"
     },
     
     "iA": {
