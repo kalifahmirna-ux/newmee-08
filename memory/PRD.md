@@ -1,84 +1,91 @@
 # NEWME CLASS - Platform Tes Bakat & Potensi
 
-## Problem Statement
-Platform test kepribadian dengan fitur:
-- Free test (5 soal, 1x saja) dengan teaser ke premium
-- Premium test (20 soal) dengan hasil analisis NYATA berdasarkan jawaban
-- **Hasil menampilkan 5 elemen dengan persentase (total 100%) dan hanya 3 tertinggi**
-- Yayasan referral system dengan komisi dan withdrawal
-- Payment via PayDisini QRIS atau manual upload
+## Update Terbaru (2 Maret 2026)
 
-## What's Been Implemented ✅
+### Perubahan yang Diminta & Diimplementasikan:
+1. ✅ **Logo NEWME** ditambahkan di sertifikat (dari file yang diupload user)
+2. ✅ **Nama layanan** diubah dari "5 TEST DASAR GRATIS" menjadi **"NEWME TEST"**
+3. ✅ **Penjelasan hasil test** dibuat lebih mudah dipahami orang awam
+4. ✅ **Rekomendasi karir SPESIFIK**: Pilot, Pedagang, Guru, Petani, Dokter, Akuntan, dll
+5. ✅ **User BISA memilih semua jawaban no 1** - tidak ada batasan
+6. ✅ **Blur lebih banyak untuk free test**:
+   - Simbol Jatidiri - BLUR
+   - Ciri Khas - BLUR
+   - Rekomendasi Karir - BLUR
+   - Skor 5 Elemen (Top 3) - BLUR
 
-### Test Flow (COMPLETE)
-1. ✅ Register dengan field lengkap (nama, email, phone, alamat, dsb)
-2. ✅ Free test 5 soal - HANYA 1 KALI
-3. ✅ Hasil free test dengan **TEASER BLUR** + CTA "UPGRADE KE PREMIUM"
-4. ✅ Premium test 20 soal
-5. ✅ **Hasil NYATA berdasarkan jawaban** - BUKAN DUMMY!
-6. ✅ **5 Elemen dengan persentase (total = 100%)**
-7. ✅ **Hanya 3 elemen tertinggi ditampilkan**
-
-### Test Analysis System (VERIFIED)
-- **5 Elemen**: Kayu, Api, Tanah, Logam, Air
-- **Setiap jawaban memiliki `scores` dict** dengan mapping ke elemen dan personality
-- **generate_test_analysis()** mengakumulasi scores dari semua jawaban
-- **Persentase dihitung dari total score** (bukan max score)
-- **Top 3 elemen** ditampilkan dengan ranking 1, 2, 3
-
-### Test Result Display
-| Field | Free Test | Premium Test |
-|-------|-----------|--------------|
-| Kepribadian | Tampil | Tampil |
-| Karakter | Blur + Teaser | Tampil Lengkap |
-| Kekuatan Jatidiri | Blur + Teaser | Tampil Lengkap |
-| Kompilasi Adaptasi | Blur + Teaser | Tampil Lengkap |
-| Skor 5 Elemen | Top 3 + % | Top 3 + % |
-| Simbol Jatidiri | Top 3 + % | Top 3 + % |
-| Ciri Khas | - | Tampil |
-| Profesi | - | Tampil |
-| Share Buttons | ✅ | ✅ |
-
-### API Test Results Verified
+## Architecture
 ```
-Free Test Example:
-- Dominant Element: air
-- Personality: Introvert  
-- Element Scores: air=60%, tanah=20%, logam=20%
-- Total: 100%
-
-Premium Test Example:
-- Dominant Element: kayu
-- Personality: Ambivert
-- Element Scores: kayu=30%, tanah=29%, api=26%
-- Total: 100% (rounded from 85%)
+/app
+├── backend/
+│   ├── personality_data.py   # 9 tipe kepribadian dengan rekomendasiKarir spesifik
+│   └── routes/test_results.py # Analisis dengan rekomendasi karir
+└── frontend/
+    ├── public/images/newme-logo.png # Logo NEWME
+    └── src/pages/TestResult.jsx     # Sertifikat dengan blur untuk free test
 ```
 
-### Payment & Yayasan (COMPLETE)
-- ✅ PayDisini QRIS generation
-- ✅ Manual payment upload
-- ✅ Admin approval dengan komisi ke yayasan
-- ✅ Yayasan wallet & withdrawal
+## Sertifikat Display
 
-## Key Files
-- `backend/routes/questions.py` - 25 questions dengan scores dict
-- `backend/routes/test_results.py` - Analysis dengan persentase total 100%
-- `frontend/src/pages/TestResult.jsx` - Display top 3 elemen dengan %
-- `frontend/src/pages/UserTest.jsx` - Test flow dengan validation
+### Free Test (NEWME TEST)
+| Field | Status |
+|-------|--------|
+| Logo NEWME | ✅ Tampil |
+| Kepribadian | ✅ Tampil |
+| Karakter | ⬛ BLUR + "UPGRADE KE PREMIUM" |
+| Kekuatan Jatidiri | ⬛ BLUR + "Tersedia di Premium" |
+| Kompilasi Adaptasi | ⬛ BLUR + "Khusus Premium" |
+| Skor 5 Elemen | ⬛ BLUR + "UPGRADE KE PREMIUM" |
+| Simbol Jatidiri | ⬛ BLUR + "PREMIUM" |
+| Ciri Khas | ⬛ BLUR + "PREMIUM" |
+| Rekomendasi Karir | ⬛ BLUR + "PREMIUM" |
+| Badge | "NEWME TEST" (hijau) |
 
-## Test Credentials
-- Admin: admin@newme.com / admin123
-- User: Daftar baru via /register
+### Premium Test (NEWME Premium)
+| Field | Status |
+|-------|--------|
+| Logo NEWME | ✅ Tampil |
+| Kepribadian | ✅ Tampil lengkap |
+| Karakter | ✅ Tampil lengkap |
+| Kekuatan Jatidiri | ✅ Tampil dengan detail |
+| Kompilasi Adaptasi | ✅ Tampil lengkap |
+| Skor 5 Elemen (Top 3) | ✅ Persentase, total 100% |
+| Simbol Jatidiri | ✅ Top 3 dengan persentase |
+| Ciri Khas | ✅ Tampil lengkap |
+| Rekomendasi Karir | ✅ SPESIFIK (Pilot, Guru, dll) |
+| Badge | "NEWME Premium" (kuning) |
 
-## Remaining Tasks
-- P2: Email notification saat payment approved
-- P2: Certificate PDF exact match dengan design
-- Future: PayDisini callback URL setup
+## Rekomendasi Karir per Tipe
 
-## Verified Working (2026-03-02)
-- [x] Free test submit dan hasil dengan teaser
-- [x] Premium test submit dan hasil lengkap
-- [x] Element scores dengan persentase total 100%
-- [x] Top 3 elemen tertinggi saja ditampilkan
-- [x] Share buttons WA/FB/IG
-- [x] Personality analysis berdasarkan jawaban NYATA
+| Tipe | Rekomendasi Karir |
+|------|------------------|
+| iK (Introvert-Kayu) | Desainer Grafis, Arsitek, Penulis, Seniman, Animator, Content Creator |
+| iT (Introvert-Tanah) | Pedagang, Atlet, Sales, Marketing, Petani Modern, Mekanik |
+| iL (Introvert-Logam) | Akuntan, Programmer, Dokter, Pilot, Bankir, Hakim, Notaris |
+| iA (Introvert-Api) | Psikolog, Konselor, Terapis, Perawat, Guru TK/SD, HR Manager |
+| iAi (Introvert-Air) | Filsuf, Peneliti, Dosen, Penulis Buku, Konsultan Strategi |
+| eK (Extrovert-Kayu) | YouTuber, Influencer, Art Director, Public Speaker, MC/Host |
+| ... | ... |
+
+## Test Flow
+1. User register → NEWME TEST (5 soal, gratis 1x)
+2. Hasil dengan teaser blur → CTA upgrade
+3. User top-up → NEWME Premium (20 soal)
+4. Hasil lengkap dengan rekomendasi karir spesifik
+5. Share ke WA/FB/IG
+
+## Verified Working
+- [x] Logo NEWME tampil di sertifikat
+- [x] Nama "NEWME TEST" untuk free test
+- [x] Blur semua field khusus di free test
+- [x] Rekomendasi karir spesifik (bukan generik)
+- [x] User bisa pilih semua jawaban no 1
+- [x] Skor 5 elemen = 100%
+- [x] Top 3 elemen tertinggi saja
+
+## Files Updated
+- `/app/frontend/public/images/newme-logo.png` - Logo NEWME
+- `/app/frontend/src/pages/TestResult.jsx` - Blur & logo
+- `/app/frontend/src/pages/UserTest.jsx` - Nama "NEWME TEST"
+- `/app/backend/personality_data.py` - rekomendasiKarir spesifik
+- `/app/backend/routes/test_results.py` - Return rekomendasiKarir
