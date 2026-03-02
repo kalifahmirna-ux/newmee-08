@@ -366,12 +366,16 @@ export default function TestResult() {
             <section>
               <h3 className="font-black text-xs text-gray-900 mb-1">Simbol Jatidiri :</h3>
               <div className="text-xs space-y-1">
-                {Object.entries(elemScores)
-                  .sort(([, a], [, b]) => b - a)
-                  .slice(0, 3)
-                  .map(([name, score], i) => (
-                    <p key={name}>
-                      <span className="text-gray-500">Dominan {['I', 'II', 'III'][i]} :</span>{' '}
+                {top3Elements.map(([name, percentage], i) => (
+                  <p key={name}>
+                    <span className="text-gray-500">Dominan {['I', 'II', 'III'][i]} :</span>{' '}
+                    <span className="font-bold capitalize" style={{ color: ELEM_COLORS[name] }}>
+                      {ELEM_LABELS[name]?.split(' ')[0] || name} ({percentage}%)
+                    </span>
+                  </p>
+                ))}
+              </div>
+            </section>
                       <strong style={{ color: ELEM_COLORS[name] }}>{name.toUpperCase()}</strong>{' '}
                       <span className="text-gray-600">{pct(score, maxElem)}%</span>
                     </p>
