@@ -321,21 +321,40 @@ export default function TestResult() {
               </section>
             )}
 
-            {/* Element Scores - Top 3 Only with Percentage (Total = 100%) */}
-            <section>
+            {/* Element Scores - Top 3 Only with Percentage (Total = 100%) - BLUR for free */}
+            <section className="relative">
               <h3 className="font-black text-sm text-gray-900 border-b pb-1 mb-2" style={{ borderColor: '#d4af37' }}>
                 Skor 5 Elemen (Top 3) :
               </h3>
-              <div className="space-y-2">
-                {top3Elements.map(([name, percentage], index) => (
-                  <div key={name} className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-yellow-400 text-black text-xs font-bold flex items-center justify-center">
-                      {index + 1}
-                    </span>
-                    <ElementBar name={name} percentage={percentage} />
+              {result.testType === 'free' ? (
+                <div className="relative">
+                  <div className="space-y-2 blur-sm select-none">
+                    {[1,2,3].map((i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <span className="w-6 h-6 rounded-full bg-yellow-400 text-black text-xs font-bold flex items-center justify-center">{i}</span>
+                        <div className="flex-1 bg-gray-200 rounded-full h-3">
+                          <div className="h-3 rounded-full bg-gray-400" style={{ width: `${80-i*15}%` }} />
+                        </div>
+                        <span className="w-10 text-gray-600 font-bold">**%</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="bg-yellow-400 text-black text-xs font-bold px-3 py-1 rounded animate-pulse">UPGRADE KE PREMIUM</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {top3Elements.map(([name, percentage], index) => (
+                    <div key={name} className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-yellow-400 text-black text-xs font-bold flex items-center justify-center">
+                        {index + 1}
+                      </span>
+                      <ElementBar name={name} percentage={percentage} />
+                    </div>
+                  ))}
+                </div>
+              )}
               <p className="text-xs text-gray-500 mt-2 italic">
                 *Total 5 elemen = 100%
               </p>
