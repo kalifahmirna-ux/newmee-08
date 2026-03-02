@@ -519,3 +519,74 @@ async def admin_verify_yayasan(yayasan_id: str):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+
+# Admin endpoints for managing withdrawals
+@router.get("/admin/withdrawals", response_model=List[dict])
+async def admin_get_withdrawals(
+    status: Optional[str] = None,
+    skip: int = 0,
+    limit: int = 50
+):
+    """Get all yayasan withdrawal requests (admin only)"""
+    try:
+        query = {"type": "withdrawal"}
+        if status:
+            query["status"] = status
+        
+        withdrawals = await db.yayasan_transactions.find(query).sort("createdAt", -1).skip(skip).limit(limit).to_list(limit)
+        
+        # Enrich with yayasan info
+        for w in withdrawals:
+            w["_id"] = str(w["_id"])
+            yayasan = await db.yayasan.find_one({"_id": ObjectId(w["yayasanId"])})
+            if yayasan:
+                w["yayasanName"] = yayasan.get("name", "")
+                w["yayasanEmail"] = yayasan.get("email", "")
+        
+        return withdrawals
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+@router.put("/admin/withdrawals/{withdrawal_id}/approve", response_model=dict)
+async def admin_approve_withdrawal(withdrawal_id: str, action: dict):
+    """Approve or reject yayasan withdrawal (admin only)"""
+    try:
+        status = action.get("status", "approved")
+        notes = action.get("notes", "")
+        
+        withdrawal = await db.yayasan_transactions.find_one({"_id": ObjectId(withdrawal_id)})
+        if not withdrawal:
+            raise HTTPException(status_code=404, detail="Penarikan tidak ditemukan")
+        
+        if withdrawal.get("status") != "pending":
+            raise HTTPException(status_code=400, detail="Penarikan sudah diproses")
+        
+        update_data = {
+            "status": status,
+            "processedAt": datetime.utcnow(),
+            "adminNotes": notes
+        }
+        
+        await db.yayasan_transactions.update_one(
+            {"_id": ObjectId(withdrawal_id)},
+            {"$set": update_data}
+        )
+        
+        # If rejected, refund the balance
+        if status == "rejected":
+            await db.yayasan_wallets.update_one(
+                {"yayasanId": withdrawal["yayasanId"]},
+                {"$inc": {"balance": withdrawal["amount"]}}
+            )
+        
+        return {
+            "success": True,
+            "message": f"Penarikan berhasil {'disetujui' if status == 'approved' else 'ditolak'}"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
