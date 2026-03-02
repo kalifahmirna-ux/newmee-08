@@ -336,8 +336,8 @@ const UserTest = () => {
                     <Star className="w-6 h-6 text-green-500" />
                   </div>
                   <div>
-                    <CardTitle className="text-white">5 Test Dasar Gratis</CardTitle>
-                    <CardDescription className="text-green-400">GRATIS</CardDescription>
+                    <CardTitle className="text-white">NEWME TEST</CardTitle>
+                    <CardDescription className="text-green-400">GRATIS - 1x Kesempatan</CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -347,10 +347,10 @@ const UserTest = () => {
                     <CheckCircle className="w-4 h-4 text-green-500 mr-2" /> {freeQuestions.length} pertanyaan dasar
                   </li>
                   <li className="flex items-center text-gray-300 text-sm">
-                    <CheckCircle className="w-4 h-4 text-green-500 mr-2" /> Hasil instant
+                    <CheckCircle className="w-4 h-4 text-green-500 mr-2" /> Hasil kepribadian singkat
                   </li>
                   <li className="flex items-center text-gray-300 text-sm">
-                    <CheckCircle className="w-4 h-4 text-green-500 mr-2" /> Rekomendasi dasar
+                    <CheckCircle className="w-4 h-4 text-green-500 mr-2" /> Preview analisis diri
                   </li>
                 </ul>
                 <Button 
@@ -361,14 +361,14 @@ const UserTest = () => {
                   {hasUsedFreeTest ? (
                     <>Sudah Digunakan <CheckCircle className="w-4 h-4 ml-2" /></>
                   ) : freeQuestions.length > 0 ? (
-                    <>Mulai Test Gratis <ArrowRight className="w-4 h-4 ml-2" /></>
+                    <>Mulai NEWME TEST <ArrowRight className="w-4 h-4 ml-2" /></>
                   ) : (
                     'Pertanyaan Tidak Tersedia'
                   )}
                 </Button>
                 {hasUsedFreeTest && (
                   <p className="text-yellow-400 text-xs mt-2 text-center">
-                    Upgrade ke Test Premium untuk analisis lengkap
+                    Upgrade ke NEWME Premium untuk analisis lengkap
                   </p>
                 )}
               </CardContent>
@@ -382,7 +382,7 @@ const UserTest = () => {
                     <Trophy className="w-6 h-6 text-yellow-500" />
                   </div>
                   <div>
-                    <CardTitle className="text-white">Test Berbayar Premium</CardTitle>
+                    <CardTitle className="text-white">NEWME Premium</CardTitle>
                     <CardDescription className={hasPaidAccess ? "text-green-400 font-semibold" : "text-yellow-400"}>
                       {hasPaidAccess ? '✓ SUDAH DIBAYAR' : formatCurrency(testPrice)}
                     </CardDescription>
