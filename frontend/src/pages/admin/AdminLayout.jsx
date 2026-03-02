@@ -20,7 +20,8 @@ import {
   UsersRound,
   Shield,
   Layout,
-  Trophy
+  Trophy,
+  ArrowDownToLine
 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { useToast } from '../../hooks/use-toast';
@@ -47,6 +48,7 @@ const AdminLayout = () => {
     { name: 'Referrals', href: '/admin/referrals', icon: Gift },
     { name: 'Articles', href: '/admin/articles', icon: FileText },
     { name: 'Yayasan', href: '/admin/yayasan', icon: UsersRound },
+    { name: 'Penarikan Yayasan', href: '/admin/withdrawals', icon: ArrowDownToLine },
     { name: 'Team & Mitra', href: '/admin/team-management', icon: Shield },
     { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
