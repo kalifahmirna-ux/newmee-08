@@ -81,19 +81,18 @@ const AppContent = () => {
           <Route path="dashboard" element={<DashboardHome />} />
           <Route path="users" element={<Users />} />
           <Route path="payments" element={<Payments />} />
-          <Route path="products" element={<Products />} />
           <Route path="questions" element={<Questions />} />
           <Route path="certificates" element={<Certificates />} />
           <Route path="banners" element={<Banners />} />
           <Route path="referrals" element={<Referrals />} />
           <Route path="articles" element={<Articles />} />
-          <Route path="running-info" element={<RunningInfo />} />
           <Route path="team-management" element={<TeamManagement />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="settings" element={<Settings />} />
           <Route path="admin-users" element={<AdminUsers />} />
           <Route path="website-content" element={<WebsiteContent />} />
           <Route path="premium-results" element={<PremiumResults />} />
+          <Route path="yayasan" element={<AdminYayasan />} />
         </Route>
         
         {/* Yayasan routes */}
