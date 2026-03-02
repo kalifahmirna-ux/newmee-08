@@ -116,7 +116,11 @@ PERSONALITY_DATA = {
             "Berat Badan cenderung bisa stabil", "Bicara dengan dipancing"
         ],
         
-        "dibutuhkanPadaProfesi": "Yang memerlukan kekuatan OTOT & INGATAN"
+        "dibutuhkanPadaProfesi": "Yang memerlukan kekuatan OTOT & INGATAN",
+        
+        "penjelasanSederhana": "Anda adalah orang yang sangat aktif, energik, dan suka bergerak. Anda pandai melihat peluang dan cepat dalam mengambil tindakan.",
+        
+        "rekomendasiKarir": "Pedagang, Pengusaha Retail, Atlet, Pelatih Olahraga, Sales, Marketing, Event Organizer, Petani Modern, Peternak, Kontraktor, Tukang Bangunan, Mekanik, Sopir Truk/Bus"
     },
     
     "iL": {
