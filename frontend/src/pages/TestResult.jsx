@@ -203,20 +203,16 @@ export default function TestResult() {
           </div>
           {/* Header content */}
           <div className="flex-1 flex items-start justify-between p-4 border-b-2" style={{ borderColor: '#d4af37' }}>
-            {/* Logo placeholder */}
+            {/* NEWME Logo */}
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full border-4 flex items-center justify-center overflow-hidden"
-                style={{ borderColor: elemColor }}>
-                <div className="grid grid-cols-2 gap-0.5 w-8 h-8">
-                  <div className="rounded-tl-full bg-red-500" />
-                  <div className="rounded-tr-full bg-yellow-500" />
-                  <div className="rounded-bl-full bg-blue-500" />
-                  <div className="rounded-br-full bg-green-500" />
-                </div>
-              </div>
+              <img 
+                src="/images/newme-logo.png" 
+                alt="NEWME Logo" 
+                className="w-16 h-16 object-contain"
+              />
               <div>
                 <p className="font-black text-xl text-gray-900 leading-none">NEW ME</p>
-                <p className="text-xs text-gray-500 italic">Jatidiri di sini</p>
+                <p className="text-xs text-gray-500 italic">Jatidirimu di sini</p>
               </div>
             </div>
 
